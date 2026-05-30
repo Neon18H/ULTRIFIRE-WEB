@@ -1,11 +1,18 @@
 import { Reveal } from './motion-wrapper';
 
-export function SectionHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
+type SectionHeadingProps = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  align?: 'left' | 'center';
+};
+
+export function SectionHeading({ eyebrow, title, description, align = 'left' }: SectionHeadingProps) {
   return (
-    <Reveal className="mx-auto mb-12 max-w-3xl text-center">
-      <p className="mb-4 text-sm font-bold uppercase tracking-[0.35em] text-cyanfire">{eyebrow}</p>
-      <h2 className="font-display text-4xl font-bold tracking-[-0.05em] text-white sm:text-5xl">{title}</h2>
-      <p className="mt-5 text-lg leading-8 text-textfire/68">{description}</p>
+    <Reveal className={align === 'center' ? 'mx-auto mb-16 max-w-3xl text-center' : 'mb-16 max-w-4xl'}>
+      <p className="mb-5 text-xs font-semibold uppercase tracking-[0.34em] text-bluefire">{eyebrow}</p>
+      <h2 className="text-4xl font-semibold leading-[1.02] tracking-[-0.055em] text-textfire sm:text-5xl lg:text-6xl">{title}</h2>
+      <p className="mt-6 max-w-2xl text-lg leading-8 text-mutedfire">{description}</p>
     </Reveal>
   );
 }

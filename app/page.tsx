@@ -10,11 +10,11 @@ import { WhyUltrifire } from '@/components/why-ultrifire';
 
 export default function Home() {
   return (
-    <main className="relative overflow-hidden">
+    <main className="relative overflow-hidden bg-night">
       <Navbar />
       <Hero />
-      <Stats />
       <WhyUltrifire />
+      <Stats />
       <Services />
       <HowItWorks />
       <Comparison />

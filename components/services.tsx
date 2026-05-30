@@ -7,67 +7,64 @@ const services = [
   {
     icon: ServerCog,
     title: 'Firewall Físico',
-    subtitle: 'Appliance NGFW',
-    description: 'Appliances Next-Generation ensamblados en Colombia con hardware Intel profesional para sedes físicas.',
-    features: ['Base hasta 80 dispositivos, Medio hasta 200 y Enterprise hasta 1000', 'Firewall, IPS/IDS con Suricata, VPN, filtrado DNS y segmentación VLAN', 'Instalación en oficinas, clínicas, colegios, retail y empresas con sede física']
+    subtitle: 'Appliances NGFW Colombia',
+    description: 'Equipos físicos diseñados para sedes que necesitan perímetro, segmentación, VPN e inspección de tráfico con operación local.',
+    features: ['Tres tiers para oficinas pequeñas, medianas y entornos enterprise', 'IPS/IDS con Suricata, VPN, DNS filtering y VLAN', 'Instalación para clínicas, colegios, retail, industria y oficinas']
   },
   {
     icon: Cloud,
     title: 'Firewall Virtual',
-    subtitle: 'Infraestructura del cliente',
-    description: 'El mismo motor de seguridad, sin hardware, desplegado en AWS, Azure, Proxmox, VMware, Hyper-V o VPS del cliente.',
-    features: ['Protege instancias cloud, servidores virtuales y entornos híbridos propios', 'El cliente provee el entorno; UltriFire provee la imagen y la gestión', 'Gateway seguro, concentrador VPN y perímetro para infraestructura virtualizada']
+    subtitle: 'Nube e infraestructura del cliente',
+    description: 'La misma postura de seguridad desplegada en AWS, Azure, Proxmox, VMware, Hyper-V o VPS, sin comprar hardware dedicado.',
+    features: ['Protección de workloads cloud, servidores virtuales y topologías híbridas', 'El cliente conserva su infraestructura; UltriFire provee la imagen y gestión', 'Gateway seguro para VPN site-to-site, usuarios remotos y servicios internos']
   },
   {
     icon: Shield,
     title: 'UltriFire Gateway Cloud',
-    subtitle: 'Gestionado por nosotros',
-    badge: 'Gestionado por UltriFire · Cero exposición',
+    subtitle: 'Perímetro gestionado',
+    badge: 'Gestionado · Cero exposición',
     highlight: true,
-    description: 'Desplegamos y operamos el firewall en nuestra propia infraestructura para ocultar servidores y aplicaciones del cliente.',
-    features: ['La infraestructura del cliente queda en red privada, sin exposición directa a internet', 'Todo el tráfico pasa por nuestro gateway, se filtra, inspecciona con IPS y viaja por túnel cifrado', 'Servicio 100% llave en mano: el cliente no monta ni administra nada', 'Protege una o varias instancias detrás de un único punto de entrada seguro', 'Ideal para startups, e-commerce y apps en la nube que no quieren exponer infraestructura']
+    description: 'Montamos y operamos el firewall en nuestra infraestructura para que tus servidores queden ocultos detrás de un túnel cifrado.',
+    features: ['Sin exposición directa de la infraestructura del cliente a internet', 'Tráfico filtrado e inspeccionado antes de llegar a tus aplicaciones', 'Servicio llave en mano para startups, e-commerce y aplicaciones críticas', 'Un punto de entrada seguro para una o varias instancias privadas']
   },
   {
     icon: MonitorCog,
-    title: 'Plataforma de Gestión',
-    subtitle: 'SaaS Multi-tenant',
-    description: 'El cerebro que administra todos los firewalls físicos, virtuales y gateways desde un solo panel centralizado.',
-    features: ['Monitoreo en tiempo real, reglas, VPN, alertas, reportes y usuarios', 'Administra 1 o 100 firewalls sin entrar manualmente a cada equipo', 'Ideal para empresas multi-sede, MSPs e integradores de TI']
+    title: 'Plataforma SaaS de Gestión',
+    subtitle: 'Panel central multi-tenant',
+    description: 'Un solo centro de control para administrar firewalls físicos, virtuales y gateways gestionados con consistencia operacional.',
+    features: ['Reglas, VPN, alertas, reportes y usuarios desde un panel central', 'Operación de múltiples sedes sin entrar manualmente a cada equipo', 'Diseñado para empresas multi-sede, MSPs e integradores de TI']
   }
 ];
 
 export function Services() {
   return (
-    <section id="servicios" className="relative overflow-hidden px-4 py-24 sm:px-6">
-      <div className="absolute left-0 top-1/3 h-96 w-96 rounded-full bg-bluefire/15 blur-[110px]" aria-hidden="true" />
-      <div className="absolute right-0 top-20 h-96 w-96 rounded-full bg-cyanfire/10 blur-[120px]" aria-hidden="true" />
+    <section id="servicios" className="relative overflow-hidden px-5 py-32 sm:px-8 lg:py-40">
+      <div className="absolute right-0 top-28 h-[32rem] w-[32rem] rounded-full bg-bluefire/8 blur-[140px]" aria-hidden="true" />
       <div className="relative mx-auto max-w-7xl">
         <SectionHeading
-          eyebrow="Nuestros servicios"
-          title="Cuatro capas para proteger cada punto de entrada"
-          description="Desde la sede física hasta aplicaciones cloud privadas, UltriFire combina NGFW, operación gestionada y un panel SaaS que simplifica la seguridad."
+          eyebrow="Servicios"
+          title="Una arquitectura sobria para cada punto de entrada."
+          description="UltriFire combina appliances, firewall virtual, perímetro cloud gestionado y una plataforma SaaS para reducir complejidad sin sacrificar control."
         />
         <div id="productos" className="grid gap-5 lg:grid-cols-2">
           {services.map((service, index) => (
-            <Reveal key={service.title} delay={index * 0.08} className={cn('group glass-card relative overflow-hidden rounded-[2rem] p-7 transition duration-300 hover:-translate-y-2', service.highlight ? 'border-orangefire/35 shadow-fire lg:row-span-2' : 'hover:border-cyanfire/30 hover:shadow-glow')}>
-              {service.highlight ? <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(255,107,0,0.20),transparent_24rem),radial-gradient(circle_at_20%_90%,rgba(0,180,255,0.18),transparent_22rem)]" aria-hidden="true" /> : null}
+            <Reveal key={service.title} delay={index * 0.06} className={cn('group enterprise-panel relative overflow-hidden p-8 transition duration-300 hover:border-bluefire/70 lg:p-10', service.highlight ? 'border-orangefire/50 lg:row-span-2' : '')}>
+              {service.highlight ? <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-orangefire/[0.045] blur-[80px]" aria-hidden="true" /> : null}
               <div className="relative">
-                <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
-                  <div className="rounded-2xl border border-cyanfire/20 bg-cyanfire/10 p-3 text-cyanfire transition group-hover:scale-110">
-                    <service.icon className="h-7 w-7" aria-hidden="true" />
+                <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
+                  <div className="border border-line p-3 text-bluefire transition group-hover:border-bluefire/50">
+                    <service.icon className="h-6 w-6 stroke-[1.6]" aria-hidden="true" />
                   </div>
-                  {service.badge ? <span className="rounded-full border border-orangefire/35 bg-orangefire/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-orangefire shadow-fire">{service.badge}</span> : null}
+                  {service.badge ? <span className="border border-orangefire/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-orangefire">{service.badge}</span> : null}
                 </div>
-                <p className="text-sm font-bold uppercase tracking-[0.28em] text-mutedfire">{service.subtitle}</p>
-                <h3 className="mt-3 font-display text-3xl font-bold tracking-[-0.04em] text-white">{service.title}</h3>
-                <p className="mt-4 text-base leading-8 text-textfire/68">{service.description}</p>
-                <ul className="mt-7 grid gap-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-mutedfire">{service.subtitle}</p>
+                <h3 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-textfire lg:text-4xl">{service.title}</h3>
+                <p className="mt-5 max-w-2xl text-base leading-7 text-mutedfire">{service.description}</p>
+                <ul className="mt-9 grid gap-4">
                   {service.features.map((feature) => (
-                    <li key={feature} className="flex gap-3 text-sm leading-6 text-textfire/72">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyanfire/12 text-cyanfire">
-                        <Check className="h-3.5 w-3.5" aria-hidden="true" />
-                      </span>
-                      {feature}
+                    <li key={feature} className="flex gap-3 text-sm leading-6 text-mutedfire">
+                      <Check className="mt-1 h-4 w-4 shrink-0 text-bluefire" aria-hidden="true" />
+                      <span>{feature}</span>
                     </li>
                   ))}
                 </ul>

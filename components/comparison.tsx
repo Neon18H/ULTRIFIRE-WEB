@@ -2,6 +2,7 @@ import { Check, Minus } from 'lucide-react';
 import { Reveal } from './motion-wrapper';
 import { SectionHeading } from './section-heading';
 
+const vendors = ['UltriFire', 'Fortinet', 'Cisco', 'Palo Alto'] as const;
 const rows = [
   ['Precio en COP', true, false, false, false],
   ['Soporte local en español', true, false, false, false],
@@ -11,33 +12,34 @@ const rows = [
 ] as const;
 
 export function Comparison() {
-  const vendors = ['UltriFire', 'Fortinet', 'Cisco', 'Palo Alto'];
   return (
-    <section className="px-4 py-24 sm:px-6">
+    <section id="comparativa" className="px-5 py-32 sm:px-8 lg:py-40">
       <div className="mx-auto max-w-7xl">
         <SectionHeading
           eyebrow="Comparativa"
-          title="La alternativa local para proteger sin fricción financiera"
-          description="UltriFire no busca reemplazar el rigor empresarial: lo hace accesible para empresas colombianas con costos previsibles y soporte cercano."
+          title="Rigor empresarial con una ventaja local decisiva."
+          description="UltriFire mantiene una postura técnica seria y elimina fricciones comerciales que suelen bloquear a empresas colombianas: moneda, soporte y dependencia operativa."
         />
-        <Reveal className="overflow-hidden rounded-[2rem] border border-white/10 bg-panel/70 shadow-2xl backdrop-blur-2xl">
+        <Reveal className="overflow-hidden border border-line bg-deep/45">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left">
+            <table className="w-full min-w-[760px] text-left">
               <thead>
-                <tr className="border-b border-white/10 bg-white/[0.035]">
-                  <th className="px-6 py-5 text-sm font-semibold text-textfire/60">Criterio</th>
+                <tr className="border-b border-line">
+                  <th className="px-6 py-6 text-sm font-semibold text-mutedfire">Criterio</th>
                   {vendors.map((vendor) => (
-                    <th key={vendor} className={vendor === 'UltriFire' ? 'px-6 py-5 font-display text-sm font-bold text-cyanfire' : 'px-6 py-5 font-display text-sm font-bold text-white'}>{vendor}</th>
+                    <th key={vendor} className={vendor === 'UltriFire' ? 'px-6 py-6 text-sm font-semibold text-bluefire' : 'px-6 py-6 text-sm font-semibold text-textfire'}>
+                      {vendor}
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {rows.map(([label, ...values]) => (
-                  <tr key={label} className="border-b border-white/10 transition hover:bg-cyanfire/[0.035] last:border-0">
-                    <td className="px-6 py-5 text-sm font-semibold text-textfire/80">{label}</td>
+                  <tr key={label} className="border-b border-line/80 last:border-0">
+                    <td className="px-6 py-6 text-sm font-medium text-textfire">{label}</td>
                     {values.map((value, index) => (
-                      <td key={`${label}-${vendors[index]}`} className="px-6 py-5">
-                        {value ? <Check className="h-5 w-5 text-greenfire" aria-label="Incluido" /> : <Minus className="h-5 w-5 text-mutedfire" aria-label="Limitado" />}
+                      <td key={`${label}-${vendors[index]}`} className="px-6 py-6">
+                        {value ? <Check className="h-5 w-5 text-bluefire" aria-label="Incluido" /> : <Minus className="h-5 w-5 text-mutedfire/55" aria-label="Limitado" />}
                       </td>
                     ))}
                   </tr>
