@@ -27,13 +27,13 @@ export function Comparison() {
                 <tr className="border-b border-white/10 bg-white/[0.035]">
                   <th className="px-6 py-5 text-sm font-semibold text-textfire/60">Criterio</th>
                   {vendors.map((vendor) => (
-                    <th key={vendor} className="px-6 py-5 font-display text-sm font-bold text-white">{vendor}</th>
+                    <th key={vendor} className={vendor === 'UltriFire' ? 'px-6 py-5 font-display text-sm font-bold text-cyanfire' : 'px-6 py-5 font-display text-sm font-bold text-white'}>{vendor}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {rows.map(([label, ...values]) => (
-                  <tr key={label} className="border-b border-white/7 last:border-0">
+                  <tr key={label} className="border-b border-white/10 transition hover:bg-cyanfire/[0.035] last:border-0">
                     <td className="px-6 py-5 text-sm font-semibold text-textfire/80">{label}</td>
                     {values.map((value, index) => (
                       <td key={`${label}-${vendors[index]}`} className="px-6 py-5">

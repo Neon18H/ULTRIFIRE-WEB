@@ -1,4 +1,4 @@
-import { Check, Cloud, CloudCog, MonitorCog, ServerCog, Shield } from 'lucide-react';
+import { Check, Cloud, MonitorCog, ServerCog, Shield } from 'lucide-react';
 import { Reveal } from './motion-wrapper';
 import { SectionHeading } from './section-heading';
 import { cn } from '@/lib/utils';
@@ -22,10 +22,10 @@ const services = [
     icon: Shield,
     title: 'UltriFire Gateway Cloud',
     subtitle: 'Gestionado por nosotros',
-    badge: 'Gestionado por UltriFire',
+    badge: 'Gestionado por UltriFire · Cero exposición',
     highlight: true,
     description: 'Desplegamos y operamos el firewall en nuestra propia infraestructura para ocultar servidores y aplicaciones del cliente.',
-    features: ['La infraestructura del cliente queda en red privada, sin exposición directa a internet', 'Todo el tráfico pasa por nuestro gateway, se filtra, inspecciona con IPS y viaja por túnel cifrado', 'Servicio llave en mano: reverse proxy + VPN, cero administración para el cliente']
+    features: ['La infraestructura del cliente queda en red privada, sin exposición directa a internet', 'Todo el tráfico pasa por nuestro gateway, se filtra, inspecciona con IPS y viaja por túnel cifrado', 'Servicio 100% llave en mano: el cliente no monta ni administra nada', 'Protege una o varias instancias detrás de un único punto de entrada seguro', 'Ideal para startups, e-commerce y apps en la nube que no quieren exponer infraestructura']
   },
   {
     icon: MonitorCog,
@@ -49,14 +49,14 @@ export function Services() {
         />
         <div id="productos" className="grid gap-5 lg:grid-cols-2">
           {services.map((service, index) => (
-            <Reveal key={service.title} delay={index * 0.08} className={cn('group glass-card relative overflow-hidden rounded-[2rem] p-7 transition duration-300 hover:-translate-y-2', service.highlight ? 'border-cyanfire/35 shadow-glow lg:row-span-2' : 'hover:border-cyanfire/30 hover:shadow-glow')}>
-              {service.highlight ? <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(0,180,255,0.22),transparent_22rem)]" aria-hidden="true" /> : null}
+            <Reveal key={service.title} delay={index * 0.08} className={cn('group glass-card relative overflow-hidden rounded-[2rem] p-7 transition duration-300 hover:-translate-y-2', service.highlight ? 'border-orangefire/35 shadow-fire lg:row-span-2' : 'hover:border-cyanfire/30 hover:shadow-glow')}>
+              {service.highlight ? <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(255,107,0,0.20),transparent_24rem),radial-gradient(circle_at_20%_90%,rgba(0,180,255,0.18),transparent_22rem)]" aria-hidden="true" /> : null}
               <div className="relative">
                 <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
                   <div className="rounded-2xl border border-cyanfire/20 bg-cyanfire/10 p-3 text-cyanfire transition group-hover:scale-110">
                     <service.icon className="h-7 w-7" aria-hidden="true" />
                   </div>
-                  {service.badge ? <span className="rounded-full border border-greenfire/30 bg-greenfire/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-greenfire">{service.badge}</span> : null}
+                  {service.badge ? <span className="rounded-full border border-orangefire/35 bg-orangefire/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-orangefire shadow-fire">{service.badge}</span> : null}
                 </div>
                 <p className="text-sm font-bold uppercase tracking-[0.28em] text-mutedfire">{service.subtitle}</p>
                 <h3 className="mt-3 font-display text-3xl font-bold tracking-[-0.04em] text-white">{service.title}</h3>

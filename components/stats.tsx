@@ -8,7 +8,7 @@ const stats = [
   { value: 36000, suffix: 'M+', label: 'ataques a Colombia en 2024', icon: ShieldAlert },
   { value: 1.5, suffix: 'M+', label: 'PYME sin protección real', icon: Activity, decimals: 1 },
   { value: 0, suffix: '', label: 'licencias en USD', icon: BadgeDollarSign },
-  { value: 100, suffix: '%', label: 'soporte local', icon: Headset }
+  { value: 100, suffix: '%', label: 'soporte local en español', icon: Headset }
 ];
 
 // Count-up ligero: se activa solo cuando la estadística entra en viewport.
