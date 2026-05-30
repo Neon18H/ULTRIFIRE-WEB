@@ -10,6 +10,7 @@ const config: Config = {
         panel: '#0D1420',
         line: '#1A2333',
         bluefire: '#1A6FFF',
+        cyanfire: '#00B4FF',
         orangefire: '#FF5A1F',
         textfire: '#F0F4FA',
         mutedfire: '#8B9CB3'

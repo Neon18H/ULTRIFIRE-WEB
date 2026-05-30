@@ -32,7 +32,7 @@ export function Navbar() {
         transition={{ duration: 0.64, ease: [0.22, 1, 0.36, 1] }}
         className={cn(
           'mx-auto flex max-w-7xl items-center justify-between border px-5 py-3 transition-all duration-300 lg:px-7',
-          isScrolled ? 'border-line/90 bg-night/88 shadow-soft backdrop-blur-xl' : 'border-transparent bg-transparent'
+          isScrolled ? 'border-line/90 bg-night/88 shadow-soft backdrop-blur-xl' : 'border-white/[0.03] bg-night/[0.02] backdrop-blur-[2px]'
         )}
       >
         <a href="#inicio" className="focus-ring rounded-lg" aria-label="Ir al inicio">
@@ -47,7 +47,7 @@ export function Navbar() {
           ))}
         </div>
 
-        <a href="#contacto" className="focus-ring hidden rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-textfire transition hover:border-bluefire hover:text-white lg:inline-flex">
+        <a href="#contacto" className="focus-ring hidden rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-textfire transition hover:border-bluefire hover:bg-bluefire/10 hover:text-white lg:inline-flex">
           Solicitar demo
         </a>
 
