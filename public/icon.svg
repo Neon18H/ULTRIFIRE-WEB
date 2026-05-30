@@ -1,6 +1,17 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="512" height="512" rx="112" fill="#02040A"/>
-  <path d="M256 76L402 132V242C402 336 341 419 256 444C171 419 110 336 110 242V132L256 76Z" fill="url(#g)" fill-opacity="0.18" stroke="#00B4FF" stroke-width="18"/>
-  <path d="M205 263L240 298L316 214" stroke="#DCE8FF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
-  <defs><linearGradient id="g" x1="110" y1="76" x2="402" y2="444" gradientUnits="userSpaceOnUse"><stop stop-color="#1A6FFF"/><stop offset="1" stop-color="#00B4FF"/></linearGradient></defs>
+  <path d="M106 72H214V308C214 344 231 368 256 376V482C168 466 106 398 106 306V72Z" fill="url(#tech)"/>
+  <path d="M298 72H406V306C406 398 344 466 256 482V376C281 368 298 344 298 308V72Z" fill="url(#fire)"/>
+  <path d="M145 122H214M130 204H214M130 286H214" stroke="#B6F4FF" stroke-width="14" stroke-linecap="round" stroke-opacity="0.74"/>
+  <circle cx="145" cy="122" r="16" fill="#B6F4FF"/>
+  <circle cx="188" cy="204" r="16" fill="#B6F4FF"/>
+  <circle cx="166" cy="286" r="16" fill="#B6F4FF"/>
+  <path d="M256 132L352 172V252C352 320 309 377 256 400C203 377 160 320 160 252V172L256 132Z" fill="#07101E" stroke="url(#metal)" stroke-width="22"/>
+  <path d="M256 198C288 238 308 267 308 312C308 349 284 372 256 372C228 372 204 349 204 312C204 267 224 238 256 198Z" fill="url(#fire)"/>
+  <path d="M250 264C267 288 279 306 279 332C279 352 266 364 250 364C234 357 226 345 226 329C226 303 238 286 250 264Z" fill="#FFD38A"/>
+  <defs>
+    <linearGradient id="tech" x1="106" y1="72" x2="256" y2="482" gradientUnits="userSpaceOnUse"><stop stop-color="#1A6FFF"/><stop offset="1" stop-color="#00B4FF"/></linearGradient>
+    <linearGradient id="fire" x1="256" y1="72" x2="406" y2="482" gradientUnits="userSpaceOnUse"><stop stop-color="#FF6B00"/><stop offset="1" stop-color="#FF3B1D"/></linearGradient>
+    <linearGradient id="metal" x1="160" y1="132" x2="352" y2="400" gradientUnits="userSpaceOnUse"><stop stop-color="#F8FBFF"/><stop offset="0.46" stop-color="#7D8AA8"/><stop offset="1" stop-color="#DCE8FF"/></linearGradient>
+  </defs>
 </svg>

@@ -10,14 +10,14 @@ export function Footer() {
           <p className="mt-5 max-w-md leading-7 text-textfire/60">
             UltriFire desarrolla soluciones de ciberseguridad empresarial con fabricación nacional, soporte local y operación cloud para proteger a la PYME colombiana.
           </p>
-          <p className="mt-5 text-sm font-semibold text-cyanfire">UltriFire — Ciberseguridad fabricada en Colombia</p>
+          <p className="mt-5 text-sm font-semibold text-cyanfire">UltriFire — Ciberseguridad fabricada en Colombia 🇨🇴</p>
         </div>
         <div>
           <h3 className="font-display font-bold text-white">Navegación</h3>
           <div className="mt-5 grid gap-3 text-sm text-textfire/60">
             <a href="#servicios" className="transition hover:text-cyanfire">Servicios</a>
             <a href="#por-que" className="transition hover:text-cyanfire">Por qué UltriFire</a>
-            <a href="#productos" className="transition hover:text-cyanfire">Productos</a>
+            <a href="#como-funciona" className="transition hover:text-cyanfire">Cómo funciona</a>
             <a href="#contacto" className="transition hover:text-cyanfire">Contacto</a>
           </div>
         </div>

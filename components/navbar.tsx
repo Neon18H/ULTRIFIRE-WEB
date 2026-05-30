@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 const links = [
   { href: '#servicios', label: 'Servicios' },
   { href: '#por-que', label: 'Por qué UltriFire' },
-  { href: '#productos', label: 'Productos' },
+  { href: '#como-funciona', label: 'Cómo funciona' },
   { href: '#contacto', label: 'Contacto' }
 ];
 
@@ -51,7 +51,7 @@ export function Navbar() {
 
         <a
           href="#contacto"
-          className="focus-ring hidden rounded-full bg-gradient-to-r from-bluefire to-cyanfire px-5 py-2.5 text-sm font-bold text-white shadow-glow transition hover:-translate-y-0.5 hover:shadow-glow-strong lg:inline-flex"
+          className="focus-ring hidden rounded-full fire-button px-5 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 lg:inline-flex"
         >
           Solicitar Demo
         </a>
@@ -74,7 +74,7 @@ export function Navbar() {
                 {link.label}
               </a>
             ))}
-            <a href="#contacto" onClick={() => setIsOpen(false)} className="mt-2 rounded-xl bg-gradient-to-r from-bluefire to-cyanfire px-4 py-3 text-center text-sm font-bold text-white">
+            <a href="#contacto" onClick={() => setIsOpen(false)} className="fire-button mt-2 rounded-xl px-4 py-3 text-center text-sm font-bold text-white">
               Solicitar Demo
             </a>
           </div>

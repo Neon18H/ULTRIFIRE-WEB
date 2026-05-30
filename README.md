@@ -62,3 +62,11 @@ public/       Assets estáticos listos para agregar imágenes o favicons
 ## Contacto / formulario
 
 El formulario usa actualmente `mailto:contacto@ultrifire.co` como integración placeholder. Está listo para conectarse posteriormente a un endpoint propio, CRM o automatización.
+
+## Características visuales implementadas
+
+- Hero cinematográfico con grid cyber, constelaciones SVG animadas, glows azules y ascuas de fuego como acento premium.
+- Identidad visual dual: azul tech dominante con fuego en CTAs, badges destacados y microinteracciones.
+- Secciones componentizadas con scroll reveal, tarjetas glassmorphism, hover glow y conteos animados.
+- Flujo "Cómo funciona" con línea de circuito dibujada al entrar en viewport.
+- Logo vectorial propio inspirado en la U/firewall con circuitos, fuego, escudo y llama central.

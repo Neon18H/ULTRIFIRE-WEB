@@ -74,7 +74,7 @@ body {
 }
 
 .logo-fire {
-  background: linear-gradient(90deg, #1a6fff 0%, #00b4ff 100%);
+  background: linear-gradient(90deg, #00b4ff 0%, #7ddfff 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -82,4 +82,23 @@ body {
 
 .noise {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.35'/%3E%3C/svg%3E");
+}
+
+
+.fire-gradient-text {
+  background: linear-gradient(90deg, #ffb000 0%, #ff6b00 42%, #ff3b1d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.fire-button {
+  background: linear-gradient(135deg, #ff6b00 0%, #ff3b1d 52%, #ffb000 100%);
+  background-size: 180% 180%;
+  box-shadow: 0 0 34px rgba(255, 107, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.fire-button:hover {
+  background-position: 100% 50%;
+  box-shadow: 0 0 70px rgba(255, 59, 29, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.26);
 }
