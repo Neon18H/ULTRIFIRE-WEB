@@ -13,21 +13,21 @@ const rows = [
 
 export function Comparison() {
   return (
-    <section id="comparativa" className="px-5 py-32 sm:px-8 lg:py-40">
+    <section id="comparativa" className="px-5 py-28 sm:px-8 lg:py-36">
       <div className="mx-auto max-w-7xl">
         <SectionHeading
           eyebrow="Comparativa"
-          title="Rigor empresarial con una ventaja local decisiva."
-          description="UltriFire mantiene una postura técnica seria y elimina fricciones comerciales que suelen bloquear a empresas colombianas: moneda, soporte y dependencia operativa."
+          title={<>Rigor empresarial con una ventaja <span className="font-semibold">local</span> decisiva.</>}
+          description="UltriFire mantiene una postura técnica seria y elimina fricciones comerciales que bloquean a empresas colombianas: moneda, soporte y dependencia operativa."
         />
-        <Reveal className="overflow-hidden border border-line bg-deep/45">
+        <Reveal className="overflow-hidden border border-line bg-deep/45 shadow-soft">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left">
               <thead>
                 <tr className="border-b border-line">
-                  <th className="px-6 py-6 text-sm font-semibold text-mutedfire">Criterio</th>
+                  <th className="px-6 py-6 text-xs font-semibold uppercase tracking-[0.22em] text-mutedfire">Criterio</th>
                   {vendors.map((vendor) => (
-                    <th key={vendor} className={vendor === 'UltriFire' ? 'px-6 py-6 text-sm font-semibold text-bluefire' : 'px-6 py-6 text-sm font-semibold text-textfire'}>
+                    <th key={vendor} className={vendor === 'UltriFire' ? 'px-6 py-6 text-sm font-semibold text-bluefire' : 'px-6 py-6 text-sm font-medium text-textfire/80'}>
                       {vendor}
                     </th>
                   ))}
@@ -35,11 +35,11 @@ export function Comparison() {
               </thead>
               <tbody>
                 {rows.map(([label, ...values]) => (
-                  <tr key={label} className="border-b border-line/80 last:border-0">
+                  <tr key={label} className="border-b border-line/80 last:border-0 hover:bg-white/[0.018]">
                     <td className="px-6 py-6 text-sm font-medium text-textfire">{label}</td>
                     {values.map((value, index) => (
                       <td key={`${label}-${vendors[index]}`} className="px-6 py-6">
-                        {value ? <Check className="h-5 w-5 text-bluefire" aria-label="Incluido" /> : <Minus className="h-5 w-5 text-mutedfire/55" aria-label="Limitado" />}
+                        {value ? <Check className="h-5 w-5 text-bluefire" aria-label="Incluido" /> : <Minus className="h-5 w-5 text-mutedfire/45" aria-label="Limitado" />}
                       </td>
                     ))}
                   </tr>
