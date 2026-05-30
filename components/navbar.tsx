@@ -38,7 +38,7 @@ export function Navbar() {
         )}
       >
         <a href="#inicio" className="focus-ring rounded-xl">
-          <Logo />
+          <Logo imageSize={40} textClassName="text-base sm:text-lg" />
         </a>
 
         <div className="hidden items-center gap-8 lg:flex">

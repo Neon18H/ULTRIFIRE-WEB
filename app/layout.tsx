@@ -25,7 +25,12 @@ export const metadata: Metadata = {
     title: 'UltriFire | Firewall Next-Generation fabricado en Colombia',
     description: 'Protección de nivel empresarial para PYME, oficinas, nube e infraestructura híbrida.'
   },
-  robots: { index: true, follow: true }
+  robots: { index: true, follow: true },
+  icons: {
+    icon: '/images/logo.png',
+    shortcut: '/images/logo.png',
+    apple: '/images/logo.png'
+  }
 };
 
 export const viewport: Viewport = {
