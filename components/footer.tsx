@@ -6,7 +6,7 @@ export function Footer() {
     <footer className="border-t border-white/10 px-4 py-12 sm:px-6">
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1.2fr_0.8fr_0.8fr]">
         <div>
-          <Logo />
+          <Logo imageSize={48} textClassName="text-xl" />
           <p className="mt-5 max-w-md leading-7 text-textfire/60">
             UltriFire desarrolla soluciones de ciberseguridad empresarial con fabricación nacional, soporte local y operación cloud para proteger a la PYME colombiana.
           </p>

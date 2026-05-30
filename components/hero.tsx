@@ -6,11 +6,20 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 
 const HERO_HARDWARE_IMAGE = '/images/hero-hardware.jpg';
 
-// Ajustar aquí qué tan oscura se ve la imagen de fondo.
-// Cambia estas clases si quieres ver más/menos detalle de la placa sin tocar el resto del hero.
-const heroImageDarknessClass = 'bg-[#02040A]/75 sm:bg-[#02040A]/65 lg:bg-[#02040A]/55';
-const heroHorizontalBlendClass = 'bg-gradient-to-r from-[#02040A] via-[#02040A]/70 sm:via-[#02040A]/62 to-transparent';
-const heroVerticalBlendClass = 'bg-gradient-to-b from-[#02040A]/25 via-[#02040A]/40 to-[#02040A]';
+// Ajustar encuadre/zoom de la imagen aquí: mueve el object-position para priorizar las luces azul/roja.
+const heroImageFrameClass = 'object-cover object-[center_center] sm:object-[58%_center] lg:object-[center_right]';
+
+// Ajustar encuadre/zoom de la imagen aquí: escala menor = menos zoom visual y más contexto del hardware.
+const heroImageZoomClass = 'scale-[0.92] sm:scale-[0.95] lg:scale-[0.97]';
+
+// Ajustar encuadre/zoom de la imagen aquí: opacidad baja para que funcione como textura premium, no como foto protagonista.
+const heroImageOpacityClass = 'opacity-55 sm:opacity-60 lg:opacity-64';
+
+// Ajustar aquí la integración con el fondo #02040A: más opacidad = imagen más oscura y sutil.
+const heroImageDarknessClass = 'bg-[#02040A]/86 sm:bg-[#02040A]/78 lg:bg-[#02040A]/70';
+const heroHorizontalBlendClass = 'bg-gradient-to-r from-[#02040A] via-[#02040A]/82 sm:via-[#02040A]/74 lg:via-[#02040A]/64 to-[#02040A]/20';
+const heroVerticalBlendClass = 'bg-gradient-to-b from-[#02040A]/58 via-[#02040A]/34 to-[#02040A]';
+const heroMobileBlendClass = 'bg-[#02040A]/16 sm:bg-transparent';
 
 // Coordenadas determinísticas para evitar diferencias de hidratación y mantener el fondo estable.
 const nodes = [
@@ -70,20 +79,23 @@ export function Hero() {
   return (
     <section id="inicio" className="relative flex min-h-screen items-center overflow-hidden bg-[#02040A] px-4 pb-20 pt-32 sm:px-6 lg:pt-40">
       <motion.div style={{ y: imageY }} className="absolute inset-x-0 -inset-y-10 z-0 bg-[#02040A]" aria-hidden="true">
-        <Image
-          src={HERO_HARDWARE_IMAGE}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-[68%_center] opacity-85 sm:object-[70%_center] lg:object-[74%_center]"
-        />
+        <div className={`absolute inset-0 ${heroImageZoomClass}`}>
+          <Image
+            src={HERO_HARDWARE_IMAGE}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className={`scale-x-[-1] ${heroImageFrameClass} ${heroImageOpacityClass}`}
+          />
+        </div>
       </motion.div>
 
       <div className={`pointer-events-none absolute inset-0 z-10 ${heroImageDarknessClass}`} aria-hidden="true" />
+      <div className={`pointer-events-none absolute inset-0 z-10 ${heroMobileBlendClass}`} aria-hidden="true" />
       <div className={`pointer-events-none absolute inset-0 z-10 ${heroHorizontalBlendClass}`} aria-hidden="true" />
       <div className={`pointer-events-none absolute inset-0 z-10 ${heroVerticalBlendClass}`} aria-hidden="true" />
-      <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_76%_32%,rgba(0,180,255,0.18),transparent_28rem),radial-gradient(circle_at_88%_54%,rgba(255,107,0,0.13),transparent_24rem)]" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_72%_32%,rgba(0,180,255,0.13),transparent_30rem),radial-gradient(circle_at_88%_54%,rgba(255,107,0,0.09),transparent_26rem)]" aria-hidden="true" />
 
       <div className="cyber-grid absolute inset-0 z-20 animate-grid-move opacity-70" aria-hidden="true" />
       <div className="absolute inset-0 z-20" aria-hidden="true">
