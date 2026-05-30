@@ -1,7 +1,16 @@
 'use client';
 
+import Image from 'next/image';
 import { ArrowRight, Cpu, Flag, LockKeyhole, Network, Radar, ShieldCheck } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+
+const HERO_HARDWARE_IMAGE = '/images/hero-hardware.jpg';
+
+// Ajustar aquí qué tan oscura se ve la imagen de fondo.
+// Cambia estas clases si quieres ver más/menos detalle de la placa sin tocar el resto del hero.
+const heroImageDarknessClass = 'bg-[#02040A]/75 sm:bg-[#02040A]/65 lg:bg-[#02040A]/55';
+const heroHorizontalBlendClass = 'bg-gradient-to-r from-[#02040A] via-[#02040A]/70 sm:via-[#02040A]/62 to-transparent';
+const heroVerticalBlendClass = 'bg-gradient-to-b from-[#02040A]/25 via-[#02040A]/40 to-[#02040A]';
 
 // Coordenadas determinísticas para evitar diferencias de hidratación y mantener el fondo estable.
 const nodes = [
@@ -54,28 +63,47 @@ function ConstellationField() {
 
 export function Hero() {
   const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 700], [0, 110]);
+  const glowY = useTransform(scrollY, [0, 700], [0, 110]);
+  const imageY = useTransform(scrollY, [0, 700], [-18, 34]);
   const opacity = useTransform(scrollY, [0, 620], [1, 0.25]);
 
   return (
-    <section id="inicio" className="relative flex min-h-screen items-center overflow-hidden px-4 pb-20 pt-32 sm:px-6 lg:pt-40">
-      <div className="cyber-grid absolute inset-0 animate-grid-move opacity-70" aria-hidden="true" />
-      <ConstellationField />
-      <div className="noise pointer-events-none absolute inset-0 opacity-[0.05]" aria-hidden="true" />
-      <motion.div style={{ y, opacity }} className="absolute left-1/2 top-24 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-cyanfire/20 blur-[120px] animate-aurora" aria-hidden="true" />
-      <div className="absolute right-[-12rem] top-20 h-[34rem] w-[34rem] rounded-full bg-orangefire/10 blur-[140px]" aria-hidden="true" />
-      <div className="absolute bottom-10 left-[-10rem] h-[28rem] w-[28rem] rounded-full bg-bluefire/20 blur-[120px]" aria-hidden="true" />
+    <section id="inicio" className="relative flex min-h-screen items-center overflow-hidden bg-[#02040A] px-4 pb-20 pt-32 sm:px-6 lg:pt-40">
+      <motion.div style={{ y: imageY }} className="absolute inset-x-0 -inset-y-10 z-0 bg-[#02040A]" aria-hidden="true">
+        <Image
+          src={HERO_HARDWARE_IMAGE}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-[68%_center] opacity-85 sm:object-[70%_center] lg:object-[74%_center]"
+        />
+      </motion.div>
+
+      <div className={`pointer-events-none absolute inset-0 z-10 ${heroImageDarknessClass}`} aria-hidden="true" />
+      <div className={`pointer-events-none absolute inset-0 z-10 ${heroHorizontalBlendClass}`} aria-hidden="true" />
+      <div className={`pointer-events-none absolute inset-0 z-10 ${heroVerticalBlendClass}`} aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_76%_32%,rgba(0,180,255,0.18),transparent_28rem),radial-gradient(circle_at_88%_54%,rgba(255,107,0,0.13),transparent_24rem)]" aria-hidden="true" />
+
+      <div className="cyber-grid absolute inset-0 z-20 animate-grid-move opacity-70" aria-hidden="true" />
+      <div className="absolute inset-0 z-20" aria-hidden="true">
+        <ConstellationField />
+      </div>
+      <div className="noise pointer-events-none absolute inset-0 z-20 opacity-[0.05]" aria-hidden="true" />
+      <motion.div style={{ y: glowY, opacity }} className="absolute left-1/2 top-24 z-20 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-cyanfire/20 blur-[120px] animate-aurora" aria-hidden="true" />
+      <div className="absolute right-[-12rem] top-20 z-20 h-[34rem] w-[34rem] rounded-full bg-orangefire/10 blur-[140px]" aria-hidden="true" />
+      <div className="absolute bottom-10 left-[-10rem] z-20 h-[28rem] w-[28rem] rounded-full bg-bluefire/20 blur-[120px]" aria-hidden="true" />
 
       {embers.map((ember) => (
         <span
           key={ember.id}
-          className="absolute h-1.5 w-1.5 rounded-full bg-orangefire shadow-[0_0_18px_rgba(255,107,0,0.92)] animate-ember"
+          className="absolute z-20 h-1.5 w-1.5 rounded-full bg-orangefire shadow-[0_0_18px_rgba(255,107,0,0.92)] animate-ember"
           style={{ left: ember.left, top: ember.top, animationDelay: ember.delay, animationDuration: ember.duration }}
           aria-hidden="true"
         />
       ))}
 
-      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="relative z-30 mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
         <motion.div initial={{ opacity: 0, y: 36 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.82, ease: [0.22, 1, 0.36, 1] }}>
           <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-cyanfire/25 bg-cyanfire/10 px-4 py-2 text-sm font-semibold text-cyanfire shadow-glow backdrop-blur-xl">
             <Flag className="h-4 w-4" aria-hidden="true" />
