@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+build
+.DS_Store
+.env*.local
+.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.vercel
+coverage
+playwright-report
+
+tsconfig.tsbuildinfo
