@@ -20,8 +20,8 @@ export function HowItWorks() {
         <div className="relative grid gap-8 lg:grid-cols-3 lg:gap-12">
           <div className="absolute left-0 right-0 top-9 hidden h-px bg-gradient-to-r from-transparent via-line to-transparent lg:block" aria-hidden="true" />
           {steps.map((step, index) => (
-            <Reveal key={step.title} delay={index * 0.08} className="relative bg-night pr-6">
-              <div className="mb-10 flex h-[4.5rem] w-[4.5rem] items-center justify-center border border-line bg-deep p-5 text-cyanfire shadow-[0_0_45px_rgba(0,180,255,0.08)]">
+            <Reveal key={step.title} delay={index * 0.08} className="relative border border-line/75 bg-deep/75 p-6 shadow-soft backdrop-blur-xl lg:border-0 lg:bg-deep/70 lg:pr-6">
+              <div className="mb-10 flex h-[4.5rem] w-[4.5rem] items-center justify-center border border-line bg-deep/85 p-5 backdrop-blur-xl text-cyanfire shadow-[0_0_45px_rgba(0,180,255,0.08)]">
                 <step.icon className="h-7 w-7 stroke-[1.35]" aria-hidden="true" />
               </div>
               <p className="mb-4 text-sm font-semibold text-bluefire">0{index + 1}</p>

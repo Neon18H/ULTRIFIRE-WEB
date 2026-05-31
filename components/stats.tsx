@@ -49,7 +49,7 @@ export function Stats() {
             Seguridad <span className="font-semibold">avanzada</span> para una realidad que ya cambió.
           </h2>
         </Reveal>
-        <div className="grid gap-0 overflow-hidden border-y border-line/90 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-0 overflow-hidden border-y border-line/90 bg-deep/75 shadow-soft backdrop-blur-xl sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
             <Reveal key={stat.label} delay={index * 0.06} className="border-line/70 px-0 py-10 sm:px-8 lg:border-l lg:first:border-l-0">
               <p className="text-5xl font-extralight tracking-[-0.04em] text-textfire sm:text-6xl">
