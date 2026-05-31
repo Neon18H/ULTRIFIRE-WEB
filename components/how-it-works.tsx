@@ -3,9 +3,9 @@ import { Reveal } from './motion-wrapper';
 import { SectionHeading } from './section-heading';
 
 const steps = [
-  { icon: Settings2, title: 'Evaluamos el perímetro', text: 'Revisamos sedes, nube, aplicaciones críticas, usuarios remotos y exposición actual para definir la arquitectura correcta.' },
-  { icon: Cable, title: 'Desplegamos el control', text: 'Instalamos appliance, firewall virtual o gateway cloud con túneles cifrados, reglas base y segmentación inicial.' },
-  { icon: ShieldCheck, title: 'Operamos desde una consola', text: 'Gestionamos políticas, VPN, alertas y reportes desde el panel SaaS con soporte local en español.' }
+  { icon: Settings2, title: 'Eliges cómo proteger', text: 'Seleccionas appliance físico, firewall virtual o UltriFire Gateway Cloud según tu perímetro, nube y operación.' },
+  { icon: Cable, title: 'Se conecta a la plataforma', text: 'El control queda enlazado con túneles cifrados, políticas base, alertas y telemetría centralizada.' },
+  { icon: ShieldCheck, title: 'Administras todo desde un panel', text: 'Gestionas sedes, VPN, reglas, usuarios y reportes desde una consola SaaS multi-tenant.' }
 ];
 
 export function HowItWorks() {
@@ -15,7 +15,7 @@ export function HowItWorks() {
         <SectionHeading
           eyebrow="Cómo funciona"
           title={<>Implementación <span className="font-semibold">clara</span>. Operación centralizada.</>}
-          description="La seguridad enterprise no tiene que sentirse compleja. UltriFire ordena el perímetro, aplica controles y mantiene visibilidad desde una sola plataforma."
+          description="Eliges cómo proteger —físico, virtual o gateway—, conectas la solución a la plataforma y administras todo desde un panel."
         />
         <div className="relative grid gap-8 lg:grid-cols-3 lg:gap-12">
           <div className="absolute left-0 right-0 top-9 hidden h-px bg-gradient-to-r from-transparent via-line to-transparent lg:block" aria-hidden="true" />

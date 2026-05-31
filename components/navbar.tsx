@@ -47,7 +47,7 @@ export function Navbar() {
           ))}
         </div>
 
-        <a href="#contacto" className="focus-ring hidden rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-textfire transition hover:border-bluefire hover:bg-bluefire/10 hover:text-white lg:inline-flex">
+        <a href="#contacto" className="focus-ring hidden rounded-lg border border-line px-5 py-2.5 text-sm font-semibold text-textfire transition hover:border-bluefire hover:bg-bluefire/10 hover:text-white lg:inline-flex">
           Solicitar demo
         </a>
 

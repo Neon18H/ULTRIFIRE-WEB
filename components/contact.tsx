@@ -18,7 +18,7 @@ export function Contact() {
             Agenda una sesión para evaluar tu perímetro y definir si necesitas appliance físico, firewall virtual o gateway cloud gestionado.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-5 sm:flex-row">
-            <a href="mailto:contacto@ultrifire.co?subject=Solicitud%20de%20demo%20UltriFire" className="focus-ring inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#1A6FFF_0%,#1A6FFF_58%,#FF5A1F_135%)] px-7 py-4 text-sm font-semibold text-white shadow-[0_18px_60px_rgba(26,111,255,0.25)] transition hover:-translate-y-0.5">
+            <a href="mailto:contacto@ultrifire.co?subject=Solicitud%20de%20demo%20UltriFire" className="focus-ring inline-flex items-center justify-center rounded-lg bg-[linear-gradient(135deg,#1A6FFF_0%,#1A6FFF_58%,#FF5A1F_135%)] px-7 py-4 text-sm font-semibold text-white shadow-[0_18px_60px_rgba(26,111,255,0.25)] transition hover:-translate-y-0.5">
               Solicitar demo
               <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
             </a>
