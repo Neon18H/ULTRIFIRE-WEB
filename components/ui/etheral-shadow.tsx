@@ -1,7 +1,7 @@
 'use client';
 
-import { animate, useMotionValue, type AnimationPlaybackControls } from 'framer-motion';
-import { useEffect, useId, useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
+import { useId, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 type EtheralShadowProps = {
@@ -19,18 +19,31 @@ type EtheralShadowProps = {
 };
 
 const DEFAULT_ANIMATION = {
-  scale: 60,
-  speed: 40
+  scale: 50,
+  speed: 35
 };
 
 const DEFAULT_NOISE = {
-  opacity: 0.3,
+  opacity: 0.2,
   scale: 1
 };
 
-// Fondo animado con filtros SVG: una sola capa decorativa, sin texto ni interacción.
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function mapRange(value: number, fromLow: number, fromHigh: number, toLow: number, toHigh: number) {
+  if (fromLow === fromHigh) {
+    return toLow;
+  }
+
+  const progress = (value - fromLow) / (fromHigh - fromLow);
+  return toLow + progress * (toHigh - toLow);
+}
+
+// Fondo etéreo local: solo gradientes CSS y filtros SVG inline, sin imágenes externas.
 export function EtheralShadow({
-  color = 'rgba(128,128,128,1)',
+  color = 'rgba(26,111,255,0.35)',
   animation = DEFAULT_ANIMATION,
   noise = DEFAULT_NOISE,
   sizing = 'fill',
@@ -38,86 +51,96 @@ export function EtheralShadow({
 }: EtheralShadowProps) {
   const reactId = useId();
   const safeId = useMemo(() => reactId.replace(/:/g, ''), [reactId]);
-  const turbulence = useMotionValue(0.008);
-  const [baseFrequency, setBaseFrequency] = useState('0.008 0.014');
-  const [isMobile, setIsMobile] = useState(false);
 
-  const scale = animation.scale ?? DEFAULT_ANIMATION.scale;
-  const speed = animation.speed ?? DEFAULT_ANIMATION.speed;
-  const noiseOpacity = noise.opacity ?? DEFAULT_NOISE.opacity;
-  const noiseScale = noise.scale ?? DEFAULT_NOISE.scale;
-  const responsiveScale = isMobile ? Math.max(scale * 0.68, 28) : scale;
-  const responsiveSpeed = isMobile ? speed * 1.35 : speed;
+  const scale = clamp(animation.scale ?? DEFAULT_ANIMATION.scale, 0, 100);
+  const speed = clamp(animation.speed ?? DEFAULT_ANIMATION.speed, 1, 100);
+  const noiseOpacity = clamp(noise.opacity ?? DEFAULT_NOISE.opacity, 0, 1);
+  const noiseScale = clamp(noise.scale ?? DEFAULT_NOISE.scale, 0.25, 3);
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 768px)');
-    const syncViewport = () => setIsMobile(mediaQuery.matches);
+  const displacementScale = mapRange(scale, 0, 100, 12, 72);
+  const blurAmount = mapRange(scale, 0, 100, 44, 74);
+  const duration = `${mapRange(speed, 1, 100, 44, 14)}s`;
+  const turbulenceLow = mapRange(scale, 0, 100, 0.004, 0.009).toFixed(4);
+  const turbulenceHigh = mapRange(scale, 0, 100, 0.009, 0.018).toFixed(4);
+  const noiseFrequency = (0.65 * noiseScale).toFixed(2);
 
-    syncViewport();
-    mediaQuery.addEventListener('change', syncViewport);
-
-    return () => mediaQuery.removeEventListener('change', syncViewport);
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = turbulence.on('change', (latest) => {
-      setBaseFrequency(`${latest.toFixed(4)} ${(latest * 1.7).toFixed(4)}`);
-    });
-
-    const controls: AnimationPlaybackControls = animate(turbulence, [0.006, 0.016, 0.009], {
-      duration: responsiveSpeed,
-      ease: 'easeInOut',
-      repeat: Infinity,
-      repeatType: 'mirror'
-    });
-
-    return () => {
-      unsubscribe();
-      controls.stop();
-    };
-  }, [responsiveSpeed, turbulence]);
+  const cssVars = {
+    '--etheral-color': color,
+    '--etheral-duration': duration,
+    '--etheral-breathe-duration': `${mapRange(speed, 1, 100, 64, 22)}s`,
+    '--etheral-blur': `${blurAmount}px`
+  } as CSSProperties;
 
   return (
     <div
       className={cn(
-        'pointer-events-none absolute inset-0 overflow-hidden bg-[#060810]',
+        'pointer-events-none absolute inset-0 isolate overflow-hidden bg-[#060810]',
         sizing === 'contain' ? 'min-h-[36rem]' : 'h-full w-full',
         className
       )}
+      style={cssVars}
       aria-hidden="true"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_12%,rgba(26,111,255,0.14),transparent_26rem),radial-gradient(circle_at_78%_34%,rgba(20,60,140,0.18),transparent_31rem),linear-gradient(180deg,#060810_0%,rgba(6,8,16,0.92)_46%,#060810_100%)]" />
-      <svg className="absolute inset-0 h-full w-full opacity-75 mix-blend-screen" preserveAspectRatio="none" role="presentation">
+      <svg className="absolute h-0 w-0" focusable="false" role="presentation" aria-hidden="true">
         <defs>
-          <filter id={`${safeId}-etheral-displace`} x="-20%" y="-20%" width="140%" height="140%" colorInterpolationFilters="sRGB">
-            <feTurbulence type="fractalNoise" baseFrequency={baseFrequency} numOctaves="3" seed="12" result="turbulence" />
-            <feDisplacementMap in="SourceGraphic" in2="turbulence" scale={responsiveScale} xChannelSelector="R" yChannelSelector="B" result="displaced" />
-            <feGaussianBlur in="displaced" stdDeviation="34" result="blurred" />
-            <feColorMatrix in="blurred" type="saturate" values="1.18" />
+          <filter id={`${safeId}-etheral-undulation`} x="-35%" y="-35%" width="170%" height="170%" colorInterpolationFilters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency={`${turbulenceLow} ${turbulenceHigh}`} numOctaves="3" seed="18" result="undulation">
+              <animate
+                attributeName="baseFrequency"
+                dur={duration}
+                values={`${turbulenceLow} ${turbulenceHigh}; ${turbulenceHigh} ${turbulenceLow}; ${turbulenceLow} ${turbulenceHigh}`}
+                repeatCount="indefinite"
+              />
+            </feTurbulence>
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="undulation"
+              scale={displacementScale}
+              xChannelSelector="R"
+              yChannelSelector="B"
+              result="displaced"
+            />
+            <feGaussianBlur in="displaced" stdDeviation={blurAmount / 3} result="softened" />
+            <feColorMatrix in="softened" type="saturate" values="1.16" />
           </filter>
-          <filter id={`${safeId}-etheral-noise`} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
-            <feTurbulence type="fractalNoise" baseFrequency={0.72 * noiseScale} numOctaves="2" stitchTiles="stitch" seed="24" />
-            <feColorMatrix type="saturate" values="0" />
-          </filter>
-          <radialGradient id={`${safeId}-etheral-glow-a`} cx="30%" cy="18%" r="62%">
-            <stop offset="0%" stopColor={color} stopOpacity="0.82" />
-            <stop offset="44%" stopColor={color} stopOpacity="0.3" />
-            <stop offset="100%" stopColor={color} stopOpacity="0" />
-          </radialGradient>
-          <radialGradient id={`${safeId}-etheral-glow-b`} cx="78%" cy="58%" r="58%">
-            <stop offset="0%" stopColor="rgba(20,60,140,0.62)" />
-            <stop offset="52%" stopColor="rgba(26,111,255,0.22)" />
-            <stop offset="100%" stopColor="rgba(26,111,255,0)" />
-          </radialGradient>
-        </defs>
 
-        <g filter={`url(#${safeId}-etheral-displace)`}>
-          <rect width="100%" height="100%" fill={`url(#${safeId}-etheral-glow-a)`} opacity="0.42" />
-          <rect width="100%" height="100%" fill={`url(#${safeId}-etheral-glow-b)`} opacity="0.5" />
-        </g>
-        <rect width="100%" height="100%" filter={`url(#${safeId}-etheral-noise)`} opacity={noiseOpacity} className="mix-blend-soft-light" />
+          <filter id={`${safeId}-etheral-noise`} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency={noiseFrequency} numOctaves="2" seed="27" stitchTiles="stitch" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0.45  0 0 0 0 0.58  0 0 0 0 1  0 0 0 0.26 0" />
+          </filter>
+        </defs>
       </svg>
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,8,16,0.22)_0%,rgba(6,8,16,0.05)_24%,rgba(6,8,16,0.34)_100%)]" />
+
+      {/* Base oscura con halos muy tenues para integrarse con las secciones post-hero. */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(26,111,255,0.1),transparent_34rem),linear-gradient(180deg,#060810_0%,rgba(6,8,16,0.88)_45%,#060810_100%)]" />
+
+      {/* Blobs suaves: la máscara está hecha con gradientes locales, nunca con imágenes remotas. */}
+      <div
+        className="absolute -inset-[18%] opacity-80 mix-blend-screen [animation:etheral-drift_var(--etheral-duration)_ease-in-out_infinite_alternate] motion-reduce:animate-none"
+        style={{ filter: `url(#${safeId}-etheral-undulation) blur(var(--etheral-blur))` }}
+      >
+        <div
+          className="h-full w-full bg-[radial-gradient(ellipse_at_24%_22%,var(--etheral-color)_0%,rgba(26,111,255,0.18)_24%,transparent_52%),radial-gradient(ellipse_at_76%_34%,rgba(31,133,255,0.26)_0%,rgba(26,111,255,0.12)_27%,transparent_55%),radial-gradient(ellipse_at_50%_76%,rgba(8,56,160,0.3)_0%,rgba(26,111,255,0.1)_30%,transparent_60%)] [mask-image:radial-gradient(ellipse_at_22%_20%,#000_0%,#000_28%,transparent_55%),radial-gradient(ellipse_at_74%_36%,#000_0%,#000_24%,transparent_52%),radial-gradient(ellipse_at_50%_72%,#000_0%,#000_24%,transparent_58%)] [mask-mode:alpha] [mask-repeat:no-repeat]"
+          style={{
+            WebkitMaskImage:
+              'radial-gradient(ellipse at 22% 20%, #000 0%, #000 28%, transparent 55%), radial-gradient(ellipse at 74% 36%, #000 0%, #000 24%, transparent 52%), radial-gradient(ellipse at 50% 72%, #000 0%, #000 24%, transparent 58%)',
+            WebkitMaskRepeat: 'no-repeat'
+          }}
+        />
+      </div>
+
+      {/* Segunda capa lenta para evitar apariencia plana o sólida. */}
+      <div className="absolute -inset-x-[10%] top-[10%] h-[72%] rounded-[45%] bg-[radial-gradient(ellipse_at_42%_50%,rgba(26,111,255,0.16),transparent_58%)] opacity-70 blur-3xl mix-blend-screen [animation:etheral-breathe_var(--etheral-breathe-duration)_ease-in-out_infinite] motion-reduce:animate-none" />
+
+      {noiseOpacity > 0 && (
+        <svg className="absolute inset-0 h-full w-full mix-blend-soft-light" preserveAspectRatio="none" role="presentation" aria-hidden="true">
+          <rect width="100%" height="100%" filter={`url(#${safeId}-etheral-noise)`} opacity={noiseOpacity} />
+        </svg>
+      )}
+
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,8,16,0.18)_0%,rgba(6,8,16,0.03)_38%,rgba(6,8,16,0.42)_100%)]" />
     </div>
   );
 }
+
+export { EtheralShadow as Component };
