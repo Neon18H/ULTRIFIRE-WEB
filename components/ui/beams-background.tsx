@@ -1,7 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 type Beam = {
@@ -24,10 +23,13 @@ type BeamsBackgroundProps = {
   children?: ReactNode;
 };
 
+const TARGET_FPS = 30;
+const FRAME_INTERVAL = 1000 / TARGET_FPS;
+
 const INTENSITY_CONFIG = {
-  subtle: { min: 10, desktop: 18, alpha: 0.42, blur: 14 },
-  medium: { min: 16, desktop: 28, alpha: 0.58, blur: 18 },
-  strong: { min: 24, desktop: 42, alpha: 0.78, blur: 22 }
+  subtle: { desktop: 12, alpha: 0.36, cssBlur: 8, glow: 3 },
+  medium: { desktop: 14, alpha: 0.48, cssBlur: 10, glow: 4 },
+  strong: { desktop: 18, alpha: 0.62, cssBlur: 12, glow: 5 }
 } as const;
 
 const BRAND_BACKGROUND = '#060810';
@@ -41,54 +43,70 @@ function getBeamHue(warm: boolean) {
   return warm ? randomBetween(20, 30) : 205 + Math.random() * 30;
 }
 
+function shouldUseStaticBackground() {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isMobileViewport = window.innerWidth < 768;
+  const isLowCoreDevice = typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 4;
+
+  return prefersReducedMotion || isMobileViewport || isLowCoreDevice;
+}
+
 function createBeam(width: number, height: number, intensityAlpha: number): Beam {
-  const warm = Math.random() < 1 / 6;
+  const warm = Math.random() < 1 / 7;
 
   return {
     x: randomBetween(-width * 0.2, width * 1.2),
     y: randomBetween(-height * 0.35, height * 1.15),
-    width: randomBetween(1.1, warm ? 2.2 : 3.4),
-    length: randomBetween(height * 0.18, height * 0.56),
+    width: randomBetween(1, warm ? 1.8 : 2.8),
+    length: randomBetween(height * 0.18, height * 0.54),
     angle: randomBetween(-24, -12) * (Math.PI / 180),
-    speed: randomBetween(0.18, 0.62),
-    alpha: randomBetween(0.08, warm ? 0.16 : 0.28) * intensityAlpha,
+    speed: randomBetween(0.14, 0.5),
+    alpha: randomBetween(0.07, warm ? 0.13 : 0.22) * intensityAlpha,
     hue: getBeamHue(warm),
     life: randomBetween(0, 1),
-    maxLife: randomBetween(220, 520),
+    maxLife: randomBetween(240, 560),
     warm
   };
 }
 
 function resetBeam(beam: Beam, width: number, height: number, intensityAlpha: number) {
-  const warm = Math.random() < 1 / 6;
+  const warm = Math.random() < 1 / 7;
   beam.x = randomBetween(-width * 0.1, width * 1.15);
   beam.y = randomBetween(-height * 0.4, -height * 0.02);
-  beam.width = randomBetween(1.1, warm ? 2.2 : 3.4);
-  beam.length = randomBetween(height * 0.18, height * 0.56);
+  beam.width = randomBetween(1, warm ? 1.8 : 2.8);
+  beam.length = randomBetween(height * 0.18, height * 0.54);
   beam.angle = randomBetween(-24, -12) * (Math.PI / 180);
-  beam.speed = randomBetween(0.18, 0.62);
-  beam.alpha = randomBetween(0.08, warm ? 0.16 : 0.28) * intensityAlpha;
+  beam.speed = randomBetween(0.14, 0.5);
+  beam.alpha = randomBetween(0.07, warm ? 0.13 : 0.22) * intensityAlpha;
   beam.hue = getBeamHue(warm);
   beam.life = 0;
-  beam.maxLife = randomBetween(220, 520);
+  beam.maxLife = randomBetween(240, 560);
   beam.warm = warm;
 }
 
-export function BeamsBackground({ intensity = 'subtle', className, children }: BeamsBackgroundProps) {
+function BeamsBackgroundComponent({ intensity = 'subtle', className, children }: BeamsBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
   const beamsRef = useRef<Beam[]>([]);
-  const isVisibleRef = useRef(true);
+  const isVisibleRef = useRef(false);
+  const isTabActiveRef = useRef(true);
+  const lastFrameTimeRef = useRef(0);
   const [hasCanvasFallback, setHasCanvasFallback] = useState(false);
   const config = INTENSITY_CONFIG[intensity];
 
-  const draw = useCallback(() => {
+  const stopAnimation = useCallback(() => {
+    if (animationRef.current !== null) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+  }, []);
+
+  const drawFrame = useCallback(() => {
     const canvas = canvasRef.current;
-    const container = containerRef.current;
     const context = canvas?.getContext('2d');
 
-    if (!canvas || !container || !context) {
+    if (!canvas || !context) {
       setHasCanvasFallback(true);
       return;
     }
@@ -112,7 +130,7 @@ export function BeamsBackground({ intensity = 'subtle', className, children }: B
       gradient.addColorStop(0.35, `hsla(${beam.hue}, 96%, ${beam.warm ? 58 : 62}%, ${alpha})`);
       gradient.addColorStop(1, `hsla(${beam.hue}, 96%, ${beam.warm ? 58 : 62}%, 0)`);
       context.shadowColor = `hsla(${beam.hue}, 96%, ${beam.warm ? 56 : 58}%, ${alpha})`;
-      context.shadowBlur = config.blur;
+      context.shadowBlur = config.glow;
       context.fillStyle = gradient;
       context.fillRect(-beam.width / 2, 0, beam.width, beam.length);
       context.restore();
@@ -127,8 +145,28 @@ export function BeamsBackground({ intensity = 'subtle', className, children }: B
     }
 
     context.globalCompositeOperation = 'source-over';
-    animationRef.current = requestAnimationFrame(draw);
-  }, [config.alpha, config.blur]);
+  }, [config.alpha, config.glow]);
+
+  const tick = useCallback((now: number) => {
+    if (!isVisibleRef.current || !isTabActiveRef.current || hasCanvasFallback) {
+      stopAnimation();
+      return;
+    }
+
+    if (now - lastFrameTimeRef.current >= FRAME_INTERVAL) {
+      lastFrameTimeRef.current = now - ((now - lastFrameTimeRef.current) % FRAME_INTERVAL);
+      drawFrame();
+    }
+
+    animationRef.current = requestAnimationFrame(tick);
+  }, [drawFrame, hasCanvasFallback, stopAnimation]);
+
+  const startAnimation = useCallback(() => {
+    if (animationRef.current === null && isVisibleRef.current && isTabActiveRef.current && !hasCanvasFallback) {
+      lastFrameTimeRef.current = performance.now();
+      animationRef.current = requestAnimationFrame(tick);
+    }
+  }, [hasCanvasFallback, tick]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -136,23 +174,21 @@ export function BeamsBackground({ intensity = 'subtle', className, children }: B
 
     if (!canvas || !container || hasCanvasFallback) return;
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const isMobile = window.innerWidth < 768;
-    const beamCount = isMobile ? config.min : config.desktop;
-
-    if (prefersReducedMotion) {
+    if (shouldUseStaticBackground()) {
       setHasCanvasFallback(true);
       return;
     }
 
     const resize = () => {
       const rect = container.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.25 : 1.6);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.35);
       canvas.width = Math.max(1, Math.floor(rect.width * dpr));
       canvas.height = Math.max(1, Math.floor(rect.height * dpr));
       canvas.style.width = `${rect.width}px`;
       canvas.style.height = `${rect.height}px`;
-      beamsRef.current = Array.from({ length: beamCount }, () => createBeam(canvas.width, canvas.height, config.alpha));
+      // Ajusta config.desktop/cssBlur para subir o bajar calidad: menos beams = menos GPU/CPU.
+      beamsRef.current = Array.from({ length: config.desktop }, () => createBeam(canvas.width, canvas.height, config.alpha));
+      drawFrame();
     };
 
     try {
@@ -167,30 +203,34 @@ export function BeamsBackground({ intensity = 'subtle', className, children }: B
     resizeObserver.observe(container);
 
     const intersectionObserver = new IntersectionObserver(([entry]) => {
+      // Los beams se pausan fuera de vista para no competir con el shader del hero.
       isVisibleRef.current = entry.isIntersecting;
-      if (entry.isIntersecting && animationRef.current === null && !hasCanvasFallback) {
-        animationRef.current = requestAnimationFrame(draw);
+      if (entry.isIntersecting) {
+        startAnimation();
+      } else {
+        stopAnimation();
       }
-      if (!entry.isIntersecting && animationRef.current !== null) {
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = null;
-      }
-    });
+    }, { rootMargin: '120px 0px', threshold: 0.01 });
     intersectionObserver.observe(container);
 
-    if (isVisibleRef.current) {
-      animationRef.current = requestAnimationFrame(draw);
-    }
+    const onVisibilityChange = () => {
+      isTabActiveRef.current = !document.hidden;
+      if (document.hidden) {
+        stopAnimation();
+      } else {
+        startAnimation();
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
-      if (animationRef.current !== null) {
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = null;
-      }
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      stopAnimation();
     };
-  }, [config.alpha, config.desktop, config.min, draw, hasCanvasFallback]);
+  }, [config.alpha, config.desktop, drawFrame, hasCanvasFallback, startAnimation, stopAnimation]);
 
   return (
     <div ref={containerRef} className={cn('pointer-events-none absolute inset-0 isolate overflow-hidden bg-[#060810]', className)} aria-hidden={!children}>
@@ -198,17 +238,18 @@ export function BeamsBackground({ intensity = 'subtle', className, children }: B
       {hasCanvasFallback ? (
         <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(26,111,255,0.08),transparent_34%,rgba(255,90,31,0.04)_62%,transparent),radial-gradient(circle_at_50%_24%,rgba(26,111,255,0.11),transparent_34rem)]" />
       ) : (
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full opacity-80" />
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 h-full w-full opacity-75"
+          style={{ filter: `blur(${config.cssBlur}px)` }}
+        />
       )}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,transparent_0%,rgba(6,8,16,0.42)_58%,#060810_100%)]" />
       <div className="absolute inset-0 bg-[#060810]/5" />
-      <motion.div
-        className="absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-[#060810] via-[#060810]/80 to-transparent"
-        initial={{ opacity: 0.72 }}
-        animate={{ opacity: [0.72, 0.9, 0.72] }}
-        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-      />
+      <div className="absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-[#060810] via-[#060810]/85 to-transparent" />
       {children ? <div className="relative z-10">{children}</div> : null}
     </div>
   );
 }
+
+export const BeamsBackground = memo(BeamsBackgroundComponent);
