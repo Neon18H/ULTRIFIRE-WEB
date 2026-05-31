@@ -9,7 +9,7 @@ const services = [
     title: 'Firewall Físico',
     subtitle: 'Appliances NGFW Colombia',
     description: 'Equipos físicos para sedes que necesitan perímetro, segmentación, VPN e inspección de tráfico con operación local y costos en COP.',
-    features: ['Tres tiers para oficinas pequeñas, medianas y entornos enterprise', 'IPS/IDS, VPN, DNS filtering, VLAN y políticas por sede', 'Instalación para clínicas, colegios, retail, industria y oficinas']
+    features: ['Tres tiers: Base 80 dispositivos, Medio 200 y Enterprise 1000', 'IPS/IDS, VPN, DNS filtering, VLAN y políticas por sede', 'Instalación para clínicas, colegios, retail, industria y oficinas']
   },
   {
     icon: Cloud,

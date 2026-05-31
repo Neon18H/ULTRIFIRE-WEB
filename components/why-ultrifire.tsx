@@ -1,6 +1,6 @@
 import { Reveal } from './motion-wrapper';
 
-const trustItems = ['Tecnología open source', 'Hecho en Colombia 🇨🇴', 'Soporte local', 'Costos previsibles en COP'];
+const trustItems = ['Tecnología open source', 'Hecho en Colombia', 'Soporte local'];
 
 export function WhyUltrifire() {
   return (

@@ -8,7 +8,7 @@ const stats = [
   { value: 36000, suffix: 'M+', label: 'ataques a Colombia en 2024' },
   { value: 1.5, suffix: 'M+', label: 'PYME sin protección real', decimals: 1 },
   { value: 0, suffix: '', prefix: '$', label: 'licencias anuales en USD' },
-  { value: 24, suffix: '/7', label: 'monitoreo y soporte local' }
+  { value: 100, suffix: '%', label: 'soporte local' }
 ];
 
 // Count-up sobrio: una sola entrada gradual cuando cada cifra aparece en viewport.
