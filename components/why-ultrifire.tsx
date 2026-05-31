@@ -4,7 +4,7 @@ const trustItems = ['Tecnología open source', 'Hecho en Colombia', 'Soporte loc
 
 export function WhyUltrifire() {
   return (
-    <section aria-label="Franja de confianza" className="border-y border-line/80 bg-deep/35 px-5 py-7 sm:px-8">
+    <section aria-label="Franja de confianza" className="border-y border-line/80 bg-deep/75 px-5 backdrop-blur-xl py-7 sm:px-8">
       <Reveal className="mx-auto flex max-w-7xl flex-col gap-4 text-xs uppercase tracking-[0.18em] text-mutedfire/85 md:flex-row md:items-center md:justify-center md:gap-8">
         {trustItems.map((item, index) => (
           <div key={item} className="flex items-center gap-4">

@@ -20,7 +20,7 @@ export function Comparison() {
           title={<>Rigor empresarial con una ventaja <span className="font-semibold">local</span> decisiva.</>}
           description="UltriFire mantiene una postura técnica seria y elimina fricciones comerciales que bloquean a empresas colombianas: moneda, soporte y dependencia operativa."
         />
-        <Reveal className="overflow-hidden border border-line bg-deep/45 shadow-soft">
+        <Reveal className="overflow-hidden border border-line bg-deep/80 shadow-soft backdrop-blur-xl">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left">
               <thead>

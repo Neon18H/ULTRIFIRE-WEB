@@ -7,7 +7,7 @@ export function Contact() {
   return (
     <section id="contacto" className="relative overflow-hidden px-5 py-28 sm:px-8 lg:py-36">
       <div className="absolute inset-x-0 top-1/2 h-96 -translate-y-1/2 bg-[radial-gradient(circle_at_50%_50%,rgba(255,90,31,0.075),transparent_34rem)]" aria-hidden="true" />
-      <Reveal className="relative mx-auto max-w-7xl overflow-hidden border border-line bg-deep/70 px-6 py-16 text-center shadow-soft sm:px-10 lg:px-16 lg:py-24">
+      <Reveal className="relative mx-auto max-w-7xl overflow-hidden border border-line bg-deep/80 px-6 backdrop-blur-xl py-16 text-center shadow-soft sm:px-10 lg:px-16 lg:py-24">
         <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent_0%,rgba(26,111,255,0.055)_45%,rgba(255,90,31,0.06)_100%)]" aria-hidden="true" />
         <div className="relative">
           <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.28em] text-orangefire">Demo ejecutiva</p>
