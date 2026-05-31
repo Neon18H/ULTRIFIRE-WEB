@@ -361,13 +361,29 @@ const Hero: React.FC<HeroProps> = ({
   buttons,
   className = ''
 }) => {
+  const heroRef = useRef<HTMLDivElement>(null);
   const [showFallback, setShowFallback] = useState(false);
+  const [isHeroVisible, setIsHeroVisible] = useState(true);
   const enableFallback = useCallback(() => setShowFallback(true), []);
-  const canvasRef = useShaderBackground(!showFallback, enableFallback);
+  const canvasRef = useShaderBackground(!showFallback && isHeroVisible, enableFallback);
   const accentedLine = headline.line2.replace(/^para\s+/i, '');
 
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+
+    // Pausa el shader WebGL al salir del viewport para no competir con el canvas de beams post-hero.
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsHeroVisible(entry.isIntersecting);
+    }, { threshold: 0.08 });
+
+    observer.observe(hero);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div id="inicio" className={`relative min-h-screen w-full overflow-hidden bg-black ${className}`}>
+    <div ref={heroRef} id="inicio" className={`relative min-h-screen w-full overflow-hidden bg-black ${className}`}>
       <style jsx>{`
         @keyframes fade-in-down {
           from {
