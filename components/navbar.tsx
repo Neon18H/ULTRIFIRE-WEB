@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { Logo } from './logo';
 import { cn } from '@/lib/utils';
 
@@ -26,10 +25,7 @@ export function Navbar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-5 py-5 sm:px-8">
-      <motion.nav
-        initial={{ y: -16, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.64, ease: [0.22, 1, 0.36, 1] }}
+      <nav
         className={cn(
           'mx-auto flex max-w-7xl items-center justify-between border px-5 py-3 transition-all duration-300 lg:px-7',
           isScrolled ? 'border-line/90 bg-night/88 shadow-soft backdrop-blur-xl' : 'border-white/[0.03] bg-night/[0.02] backdrop-blur-[2px]'
@@ -54,7 +50,7 @@ export function Navbar() {
         <button type="button" aria-label="Abrir menú" onClick={() => setIsOpen((value) => !value)} className="focus-ring rounded-lg border border-line p-2 text-textfire lg:hidden">
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
-      </motion.nav>
+      </nav>
 
       {isOpen ? (
         <div className="mx-auto mt-3 max-w-7xl border border-line bg-night/96 p-3 shadow-soft backdrop-blur-xl lg:hidden">

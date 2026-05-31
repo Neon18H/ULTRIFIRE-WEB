@@ -23,15 +23,6 @@ const config: Config = {
         soft: '0 24px 90px rgba(0, 0, 0, 0.36)',
         border: 'inset 0 1px 0 rgba(255, 255, 255, 0.04)'
       },
-      keyframes: {
-        breathe: {
-          '0%, 100%': { opacity: '0.28', transform: 'scale(1)' },
-          '50%': { opacity: '0.42', transform: 'scale(1.04)' }
-        }
-      },
-      animation: {
-        breathe: 'breathe 18s ease-in-out infinite'
-      }
     }
   },
   plugins: []
