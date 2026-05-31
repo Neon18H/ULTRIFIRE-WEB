@@ -21,14 +21,23 @@ function CountUp({ value, suffix, prefix = '', decimals = 0 }: { value: number; 
     if (!inView) return;
     const duration = 1250;
     const start = performance.now();
+    let animationFrame: number | null = null;
     const animate = (time: number) => {
       const progress = Math.min((time - start) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       setDisplay(value * eased);
-      if (progress < 1) requestAnimationFrame(animate);
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
     };
-    requestAnimationFrame(animate);
-  }, [inView, value]);
+    animationFrame = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrame !== null) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+  }, [decimals, inView, value]);
 
   return (
     <span ref={ref}>

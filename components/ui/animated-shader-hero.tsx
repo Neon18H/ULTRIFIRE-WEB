@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 
-// Types for component props
 interface HeroProps {
   trustBadge?: {
     text: string;
@@ -36,323 +35,369 @@ type ShaderProgram = WebGLProgram & {
   pointers?: WebGLUniformLocation | null;
 };
 
-// Reusable Shader Background Hook
+const TARGET_FPS = 30;
+const FRAME_INTERVAL = 1000 / TARGET_FPS;
+
+function shouldUseStaticHeroBackground() {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isMobileViewport = window.innerWidth < 768;
+  const isLowCoreDevice = typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 4;
+
+  return prefersReducedMotion || isMobileViewport || isLowCoreDevice;
+}
+
+class WebGLRenderer {
+  private canvas: HTMLCanvasElement;
+  private gl: WebGL2RenderingContext;
+  private program: ShaderProgram | null = null;
+  private vs: WebGLShader | null = null;
+  private fs: WebGLShader | null = null;
+  private buffer: WebGLBuffer | null = null;
+  private shaderSource: string;
+  private mouseMove = [0, 0];
+  private mouseCoords = [0, 0];
+  private pointerCoords = [0, 0];
+  private nbrOfPointers = 0;
+
+  private vertexSrc = `#version 300 es
+precision highp float;
+in vec4 position;
+void main(){gl_Position=position;}`;
+
+  private vertices = [-1, 1, -1, -1, 1, 1, 1, -1];
+
+  constructor(canvas: HTMLCanvasElement) {
+    this.canvas = canvas;
+    const gl = canvas.getContext('webgl2', {
+      alpha: false,
+      antialias: false,
+      depth: false,
+      stencil: false,
+      powerPreference: 'high-performance'
+    });
+    if (!gl) {
+      throw new Error('WebGL2 no está disponible en este dispositivo.');
+    }
+    this.gl = gl;
+    this.shaderSource = defaultShaderSource;
+  }
+
+  updateShader(source: string) {
+    this.reset();
+    this.shaderSource = source;
+    this.setup();
+    this.init();
+  }
+
+  updateMove(deltas: number[]) {
+    this.mouseMove = deltas;
+  }
+
+  updateMouse(coords: number[]) {
+    this.mouseCoords = coords;
+  }
+
+  updatePointerCoords(coords: number[]) {
+    this.pointerCoords = coords;
+  }
+
+  updatePointerCount(nbr: number) {
+    this.nbrOfPointers = nbr;
+  }
+
+  updateViewport() {
+    this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  compile(shader: WebGLShader, source: string) {
+    const gl = this.gl;
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      const error = gl.getShaderInfoLog(shader);
+      console.error('Shader compilation error:', error);
+    }
+  }
+
+  test(source: string) {
+    let result = null;
+    const gl = this.gl;
+    const shader = gl.createShader(gl.FRAGMENT_SHADER)!;
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      result = gl.getShaderInfoLog(shader);
+    }
+    gl.deleteShader(shader);
+    return result;
+  }
+
+  reset() {
+    const gl = this.gl;
+    if (this.buffer) {
+      gl.deleteBuffer(this.buffer);
+      this.buffer = null;
+    }
+    if (this.program && !gl.getProgramParameter(this.program, gl.DELETE_STATUS)) {
+      if (this.vs) {
+        gl.detachShader(this.program, this.vs);
+        gl.deleteShader(this.vs);
+        this.vs = null;
+      }
+      if (this.fs) {
+        gl.detachShader(this.program, this.fs);
+        gl.deleteShader(this.fs);
+        this.fs = null;
+      }
+      gl.deleteProgram(this.program);
+      this.program = null;
+    }
+  }
+
+  setup() {
+    const gl = this.gl;
+    this.vs = gl.createShader(gl.VERTEX_SHADER)!;
+    this.fs = gl.createShader(gl.FRAGMENT_SHADER)!;
+    this.compile(this.vs, this.vertexSrc);
+    this.compile(this.fs, this.shaderSource);
+    this.program = gl.createProgram()! as ShaderProgram;
+    gl.attachShader(this.program, this.vs);
+    gl.attachShader(this.program, this.fs);
+    gl.linkProgram(this.program);
+
+    if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
+      console.error(gl.getProgramInfoLog(this.program));
+    }
+  }
+
+  init() {
+    const gl = this.gl;
+    const program = this.program!;
+
+    this.buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+
+    const position = gl.getAttribLocation(program, 'position');
+    gl.enableVertexAttribArray(position);
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+    program.resolution = gl.getUniformLocation(program, 'resolution');
+    program.time = gl.getUniformLocation(program, 'time');
+    program.move = gl.getUniformLocation(program, 'move');
+    program.touch = gl.getUniformLocation(program, 'touch');
+    program.pointerCount = gl.getUniformLocation(program, 'pointerCount');
+    program.pointers = gl.getUniformLocation(program, 'pointers');
+  }
+
+  render(now = 0) {
+    const gl = this.gl;
+    const program = this.program;
+
+    if (!program || gl.getProgramParameter(program, gl.DELETE_STATUS)) return;
+
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(program);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+
+    gl.uniform2f(program.resolution ?? null, this.canvas.width, this.canvas.height);
+    gl.uniform1f(program.time ?? null, now * 1e-3);
+    gl.uniform2f(program.move ?? null, this.mouseMove[0], this.mouseMove[1]);
+    gl.uniform2f(program.touch ?? null, this.mouseCoords[0], this.mouseCoords[1]);
+    gl.uniform1i(program.pointerCount ?? null, this.nbrOfPointers);
+    gl.uniform2fv(program.pointers ?? null, this.pointerCoords);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+}
+
+class PointerHandler {
+  private scale: number;
+  private active = false;
+  private pointers = new Map<number, number[]>();
+  private lastCoords = [0, 0];
+  private moves = [0, 0];
+  private element: HTMLCanvasElement;
+
+  constructor(element: HTMLCanvasElement, scale: number) {
+    this.element = element;
+    this.scale = scale;
+    element.addEventListener('pointerdown', this.onPointerDown, { passive: true });
+    element.addEventListener('pointerup', this.onPointerEnd, { passive: true });
+    element.addEventListener('pointerleave', this.onPointerEnd, { passive: true });
+    element.addEventListener('pointermove', this.onPointerMove, { passive: true });
+  }
+
+  private map = (x: number, y: number) => [x * this.scale, this.element.height - y * this.scale];
+
+  private onPointerDown = (e: PointerEvent) => {
+    this.active = true;
+    this.pointers.set(e.pointerId, this.map(e.clientX, e.clientY));
+  };
+
+  private onPointerEnd = (e: PointerEvent) => {
+    if (this.count === 1) {
+      this.lastCoords = this.first;
+    }
+    this.pointers.delete(e.pointerId);
+    this.active = this.pointers.size > 0;
+  };
+
+  private onPointerMove = (e: PointerEvent) => {
+    if (!this.active) return;
+    this.lastCoords = [e.clientX, e.clientY];
+    this.pointers.set(e.pointerId, this.map(e.clientX, e.clientY));
+    this.moves = [this.moves[0] + e.movementX, this.moves[1] + e.movementY];
+  };
+
+  updateScale(scale: number) {
+    this.scale = scale;
+  }
+
+  destroy() {
+    this.element.removeEventListener('pointerdown', this.onPointerDown);
+    this.element.removeEventListener('pointerup', this.onPointerEnd);
+    this.element.removeEventListener('pointerleave', this.onPointerEnd);
+    this.element.removeEventListener('pointermove', this.onPointerMove);
+  }
+
+  get count() {
+    return this.pointers.size;
+  }
+
+  get move() {
+    return this.moves;
+  }
+
+  get coords() {
+    return this.pointers.size > 0 ? Array.from(this.pointers.values()).flat() : [0, 0];
+  }
+
+  get first() {
+    return this.pointers.values().next().value || this.lastCoords;
+  }
+}
+
 const useShaderBackground = (enabled = true, onFallback?: () => void) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const rendererRef = useRef<WebGLRenderer | null>(null);
   const pointersRef = useRef<PointerHandler | null>(null);
+  const isVisibleRef = useRef(false);
+  const isTabActiveRef = useRef(true);
+  const lastFrameTimeRef = useRef(0);
 
-  // WebGL Renderer class
-  class WebGLRenderer {
-    private canvas: HTMLCanvasElement;
-    private gl: WebGL2RenderingContext;
-    private program: ShaderProgram | null = null;
-    private vs: WebGLShader | null = null;
-    private fs: WebGLShader | null = null;
-    private buffer: WebGLBuffer | null = null;
-    private scale: number;
-    private shaderSource: string;
-    private mouseMove = [0, 0];
-    private mouseCoords = [0, 0];
-    private pointerCoords = [0, 0];
-    private nbrOfPointers = 0;
+  const stopAnimation = useCallback(() => {
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+  }, []);
 
-    private vertexSrc = `#version 300 es
-precision highp float;
-in vec4 position;
-void main(){gl_Position=position;}`;
-
-    private vertices = [-1, 1, -1, -1, 1, 1, 1, -1];
-
-    constructor(canvas: HTMLCanvasElement, scale: number) {
-      this.canvas = canvas;
-      this.scale = scale;
-      const gl = canvas.getContext('webgl2');
-      if (!gl) {
-        throw new Error('WebGL2 no está disponible en este dispositivo.');
-      }
-      this.gl = gl;
-      this.gl.viewport(0, 0, canvas.width * scale, canvas.height * scale);
-      this.shaderSource = defaultShaderSource;
+  const loop = useCallback((now: number) => {
+    if (!rendererRef.current || !pointersRef.current || !isVisibleRef.current || !isTabActiveRef.current) {
+      stopAnimation();
+      return;
     }
 
-    updateShader(source: string) {
-      this.reset();
-      this.shaderSource = source;
-      this.setup();
-      this.init();
+    if (now - lastFrameTimeRef.current >= FRAME_INTERVAL) {
+      lastFrameTimeRef.current = now - ((now - lastFrameTimeRef.current) % FRAME_INTERVAL);
+      rendererRef.current.updateMouse(pointersRef.current.first);
+      rendererRef.current.updatePointerCount(pointersRef.current.count);
+      rendererRef.current.updatePointerCoords(pointersRef.current.coords);
+      rendererRef.current.updateMove(pointersRef.current.move);
+      rendererRef.current.render(now);
     }
 
-    updateMove(deltas: number[]) {
-      this.mouseMove = deltas;
-    }
-
-    updateMouse(coords: number[]) {
-      this.mouseCoords = coords;
-    }
-
-    updatePointerCoords(coords: number[]) {
-      this.pointerCoords = coords;
-    }
-
-    updatePointerCount(nbr: number) {
-      this.nbrOfPointers = nbr;
-    }
-
-    updateScale(scale: number) {
-      this.scale = scale;
-      this.gl.viewport(0, 0, this.canvas.width * scale, this.canvas.height * scale);
-    }
-
-    compile(shader: WebGLShader, source: string) {
-      const gl = this.gl;
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
-
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        const error = gl.getShaderInfoLog(shader);
-        console.error('Shader compilation error:', error);
-      }
-    }
-
-    test(source: string) {
-      let result = null;
-      const gl = this.gl;
-      const shader = gl.createShader(gl.FRAGMENT_SHADER)!;
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
-
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        result = gl.getShaderInfoLog(shader);
-      }
-      gl.deleteShader(shader);
-      return result;
-    }
-
-    reset() {
-      const gl = this.gl;
-      if (this.program && !gl.getProgramParameter(this.program, gl.DELETE_STATUS)) {
-        if (this.vs) {
-          gl.detachShader(this.program, this.vs);
-          gl.deleteShader(this.vs);
-        }
-        if (this.fs) {
-          gl.detachShader(this.program, this.fs);
-          gl.deleteShader(this.fs);
-        }
-        gl.deleteProgram(this.program);
-      }
-    }
-
-    setup() {
-      const gl = this.gl;
-      this.vs = gl.createShader(gl.VERTEX_SHADER)!;
-      this.fs = gl.createShader(gl.FRAGMENT_SHADER)!;
-      this.compile(this.vs, this.vertexSrc);
-      this.compile(this.fs, this.shaderSource);
-      this.program = gl.createProgram()! as ShaderProgram;
-      gl.attachShader(this.program, this.vs);
-      gl.attachShader(this.program, this.fs);
-      gl.linkProgram(this.program);
-
-      if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
-        console.error(gl.getProgramInfoLog(this.program));
-      }
-    }
-
-    init() {
-      const gl = this.gl;
-      const program = this.program!;
-
-      this.buffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
-
-      const position = gl.getAttribLocation(program, 'position');
-      gl.enableVertexAttribArray(position);
-      gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
-
-      program.resolution = gl.getUniformLocation(program, 'resolution');
-      program.time = gl.getUniformLocation(program, 'time');
-      program.move = gl.getUniformLocation(program, 'move');
-      program.touch = gl.getUniformLocation(program, 'touch');
-      program.pointerCount = gl.getUniformLocation(program, 'pointerCount');
-      program.pointers = gl.getUniformLocation(program, 'pointers');
-    }
-
-    render(now = 0) {
-      const gl = this.gl;
-      const program = this.program;
-
-      if (!program || gl.getProgramParameter(program, gl.DELETE_STATUS)) return;
-
-      gl.clearColor(0, 0, 0, 1);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.useProgram(program);
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-
-      gl.uniform2f(program.resolution ?? null, this.canvas.width, this.canvas.height);
-      gl.uniform1f(program.time ?? null, now * 1e-3);
-      gl.uniform2f(program.move ?? null, this.mouseMove[0], this.mouseMove[1]);
-      gl.uniform2f(program.touch ?? null, this.mouseCoords[0], this.mouseCoords[1]);
-      gl.uniform1i(program.pointerCount ?? null, this.nbrOfPointers);
-      gl.uniform2fv(program.pointers ?? null, this.pointerCoords);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    }
-  }
-
-  // Pointer Handler class
-  class PointerHandler {
-    private scale: number;
-    private active = false;
-    private pointers = new Map<number, number[]>();
-    private lastCoords = [0, 0];
-    private moves = [0, 0];
-
-    constructor(element: HTMLCanvasElement, scale: number) {
-      this.scale = scale;
-
-      const map = (element: HTMLCanvasElement, scale: number, x: number, y: number) =>
-        [x * scale, element.height - y * scale];
-
-      element.addEventListener('pointerdown', (e) => {
-        this.active = true;
-        this.pointers.set(e.pointerId, map(element, this.getScale(), e.clientX, e.clientY));
-      });
-
-      element.addEventListener('pointerup', (e) => {
-        if (this.count === 1) {
-          this.lastCoords = this.first;
-        }
-        this.pointers.delete(e.pointerId);
-        this.active = this.pointers.size > 0;
-      });
-
-      element.addEventListener('pointerleave', (e) => {
-        if (this.count === 1) {
-          this.lastCoords = this.first;
-        }
-        this.pointers.delete(e.pointerId);
-        this.active = this.pointers.size > 0;
-      });
-
-      element.addEventListener('pointermove', (e) => {
-        if (!this.active) return;
-        this.lastCoords = [e.clientX, e.clientY];
-        this.pointers.set(e.pointerId, map(element, this.getScale(), e.clientX, e.clientY));
-        this.moves = [this.moves[0] + e.movementX, this.moves[1] + e.movementY];
-      });
-    }
-
-    getScale() {
-      return this.scale;
-    }
-
-    updateScale(scale: number) {
-      this.scale = scale;
-    }
-
-    get count() {
-      return this.pointers.size;
-    }
-
-    get move() {
-      return this.moves;
-    }
-
-    get coords() {
-      return this.pointers.size > 0
-        ? Array.from(this.pointers.values()).flat()
-        : [0, 0];
-    }
-
-    get first() {
-      return this.pointers.values().next().value || this.lastCoords;
-    }
-  }
-
-  const resize = () => {
-    if (!canvasRef.current) return;
-
-    const canvas = canvasRef.current;
-    const dpr = Math.max(1, 0.5 * window.devicePixelRatio);
-
-    canvas.width = window.innerWidth * dpr;
-    canvas.height = window.innerHeight * dpr;
-
-    if (rendererRef.current) {
-      rendererRef.current.updateScale(dpr);
-    }
-  };
-
-  const loop = (now: number) => {
-    if (!rendererRef.current || !pointersRef.current) return;
-
-    rendererRef.current.updateMouse(pointersRef.current.first);
-    rendererRef.current.updatePointerCount(pointersRef.current.count);
-    rendererRef.current.updatePointerCoords(pointersRef.current.coords);
-    rendererRef.current.updateMove(pointersRef.current.move);
-    rendererRef.current.render(now);
     animationFrameRef.current = requestAnimationFrame(loop);
-  };
+  }, [stopAnimation]);
+
+  const startAnimation = useCallback(() => {
+    if (animationFrameRef.current === null && rendererRef.current && isVisibleRef.current && isTabActiveRef.current) {
+      lastFrameTimeRef.current = performance.now();
+      animationFrameRef.current = requestAnimationFrame(loop);
+    }
+  }, [loop]);
 
   useEffect(() => {
     if (!canvasRef.current || !enabled) return;
 
     const canvas = canvasRef.current;
-    const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const isSmallTouchDevice = window.innerWidth < 768 && navigator.maxTouchPoints > 0;
-    const isLowCoreDevice = typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 4;
-    const hasWebGL2 = Boolean(canvas.getContext('webgl2'));
 
-    // Fallback de rendimiento: evita forzar GPU en móviles modestos o sin WebGL2.
-    if (!hasWebGL2 || isReducedMotion || (isSmallTouchDevice && isLowCoreDevice)) {
+    // Calidad ajustable: en móvil, CPU baja o reduced-motion usamos gradiente estático premium.
+    if (shouldUseStaticHeroBackground()) {
       onFallback?.();
       return;
     }
 
-    const dpr = Math.max(1, 0.5 * window.devicePixelRatio);
+    const dpr = Math.min(Math.max(1, 0.5 * window.devicePixelRatio), 1.25);
+
+    const resize = () => {
+      canvas.width = Math.max(1, Math.floor(window.innerWidth * dpr));
+      canvas.height = Math.max(1, Math.floor(window.innerHeight * dpr));
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      pointersRef.current?.updateScale(dpr);
+      rendererRef.current?.updateViewport();
+    };
 
     try {
-      rendererRef.current = new WebGLRenderer(canvas, dpr);
+      rendererRef.current = new WebGLRenderer(canvas);
       pointersRef.current = new PointerHandler(canvas, dpr);
-
       rendererRef.current.setup();
       rendererRef.current.init();
-
       resize();
 
       if (rendererRef.current.test(defaultShaderSource) === null) {
         rendererRef.current.updateShader(defaultShaderSource);
       }
-
-      loop(0);
+      rendererRef.current.render(0);
     } catch (error) {
       console.error(error);
       onFallback?.();
       return;
     }
 
-    window.addEventListener('resize', resize);
-
-    return () => {
-      window.removeEventListener('resize', resize);
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+    const observer = new IntersectionObserver(([entry]) => {
+      // Ajuste de performance: el shader solo consume GPU mientras el hero cruza el viewport.
+      isVisibleRef.current = entry.isIntersecting;
+      if (entry.isIntersecting) {
+        startAnimation();
+      } else {
+        stopAnimation();
       }
-      if (rendererRef.current) {
-        rendererRef.current.reset();
+    }, { threshold: 0.08 });
+    observer.observe(canvas);
+
+    const onVisibilityChange = () => {
+      isTabActiveRef.current = !document.hidden;
+      if (document.hidden) {
+        stopAnimation();
+      } else {
+        startAnimation();
       }
     };
-  // La lógica WebGL se inicializa una sola vez por estado enabled/fallback; las clases locales siguen el componente original.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, onFallback]);
+
+    window.addEventListener('resize', resize, { passive: true });
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', resize);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      stopAnimation();
+      pointersRef.current?.destroy();
+      pointersRef.current = null;
+      rendererRef.current?.reset();
+      rendererRef.current = null;
+    };
+  }, [enabled, onFallback, startAnimation, stopAnimation]);
 
   return canvasRef;
 };
 
-// Reusable Hero Component
 const Hero: React.FC<HeroProps> = ({
   trustBadge,
   microLabel = 'PROTECCIÓN DE NUEVA GENERACIÓN',
@@ -361,29 +406,13 @@ const Hero: React.FC<HeroProps> = ({
   buttons,
   className = ''
 }) => {
-  const heroRef = useRef<HTMLDivElement>(null);
   const [showFallback, setShowFallback] = useState(false);
-  const [isHeroVisible, setIsHeroVisible] = useState(true);
   const enableFallback = useCallback(() => setShowFallback(true), []);
-  const canvasRef = useShaderBackground(!showFallback && isHeroVisible, enableFallback);
+  const canvasRef = useShaderBackground(!showFallback, enableFallback);
   const accentedLine = headline.line2.replace(/^para\s+/i, '');
 
-  useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero) return;
-
-    // Pausa el shader WebGL al salir del viewport para no competir con el canvas de beams post-hero.
-    const observer = new IntersectionObserver(([entry]) => {
-      setIsHeroVisible(entry.isIntersecting);
-    }, { threshold: 0.08 });
-
-    observer.observe(hero);
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <div ref={heroRef} id="inicio" className={`relative min-h-screen w-full overflow-hidden bg-black ${className}`}>
+    <div id="inicio" className={`relative min-h-screen w-full overflow-hidden bg-black ${className}`}>
       <style jsx>{`
         @keyframes fade-in-down {
           from {
@@ -432,15 +461,13 @@ const Hero: React.FC<HeroProps> = ({
           animation-delay: 0.8s;
         }
 
-        @keyframes gradient-shift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-
-        .animate-gradient {
-          background-size: 200% 200%;
-          animation: gradient-shift 3s ease infinite;
+        @media (prefers-reduced-motion: reduce) {
+          .animate-fade-in-down,
+          .animate-fade-in-up {
+            animation: none;
+            opacity: 1;
+            transform: none;
+          }
         }
       `}</style>
 
@@ -458,10 +485,8 @@ const Hero: React.FC<HeroProps> = ({
       <div className="absolute inset-0 z-[2] bg-[linear-gradient(90deg,rgba(6,8,16,0.92)_0%,rgba(6,8,16,0.72)_34%,rgba(6,8,16,0.34)_64%,rgba(6,8,16,0.16)_100%)]" aria-hidden="true" />
       <div className="absolute inset-x-0 bottom-0 z-[3] h-40 bg-gradient-to-t from-night to-transparent" aria-hidden="true" />
 
-      {/* Hero Content Overlay */}
       <div className="relative z-10 flex min-h-screen flex-col items-start justify-center px-5 pb-24 pt-36 text-left text-white sm:px-8 lg:px-16 lg:pt-40 xl:px-24">
         <div className="max-w-4xl">
-          {/* Trust Badge */}
           {trustBadge && (
             <div className="mb-8 animate-fade-in-down">
               <div className="inline-flex items-center gap-2 rounded-lg border border-blue-300/20 bg-blue-500/10 px-4 py-2 text-sm backdrop-blur-md">
@@ -495,14 +520,12 @@ const Hero: React.FC<HeroProps> = ({
             </h2>
           </div>
 
-          {/* Subtitle with Animation */}
           <div className="animate-fade-in-up animation-delay-800">
             <p className="mt-8 max-w-2xl text-base font-light leading-8 text-[#B7C4D8] sm:text-lg lg:text-xl">
               {subtitle}
             </p>
           </div>
 
-          {/* CTA Buttons with Animation */}
           {buttons && (
             <div className="mt-10 flex animate-fade-in-up flex-col gap-5 animation-delay-800 sm:flex-row sm:items-center">
               {buttons.primary && (
@@ -529,6 +552,7 @@ const Hero: React.FC<HeroProps> = ({
   );
 };
 
+const MemoizedHero = memo(Hero);
 const defaultShaderSource = `#version 300 es
 /*********
 * made by Matthias Hurrle (@atzedent)
@@ -600,4 +624,4 @@ void main(void) {
   O=vec4(col,1);
 }`;
 
-export default Hero;
+export default MemoizedHero;
