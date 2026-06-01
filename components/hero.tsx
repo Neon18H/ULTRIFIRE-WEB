@@ -1,59 +1,51 @@
-import { Activity, ArrowRight, Eye, LockKeyhole, Network, Radar, Server, ShieldCheck, Zap } from 'lucide-react';
+"use client"
 
-const securityMetrics = [
-  { label: 'Amenazas bloqueadas', value: '98.7%', accent: 'text-cyanfire' },
-  { label: 'Tráfico inspeccionado', value: '24.8 TB', accent: 'text-textfire' },
-  { label: 'Latencia NGFW', value: '4.2 ms', accent: 'text-orangefire' }
-];
+import React, { useEffect, useRef, useState, Suspense, lazy } from "react"
+import { Activity, ArrowRight, ShieldCheck } from "lucide-react"
 
-const interfaces = [
-  { name: 'WAN-01', status: 'UP', traffic: '8.4 Gbps' },
-  { name: 'LAN-Core', status: 'UP', traffic: '12.1 Gbps' },
-  { name: 'DMZ-SOC', status: 'UP', traffic: '2.6 Gbps' }
-];
+const Spline = lazy(() => import("@splinetool/react-spline"))
+
+const SCREENSHOT_URL =
+  "https://cdn.sanity.io/images/s6lu43cv/production-v4/13b6177b537aee0fc311a867ea938f16416e8670-3840x2160.jpg?w=3840&h=2160&q=10&auto=format&fm=jpg"
 
 function HeroSplineBackground() {
   return (
-    <div className="relative h-screen w-full overflow-hidden">
-      <iframe
-        src="https://my.spline.design/us3ALejTXl6usHZ7/"
-        className="h-full w-full border-0"
-        allowFullScreen
-      />
+    <div className="absolute inset-0 h-screen w-full overflow-hidden bg-black">
+      <Suspense fallback={<div className="h-screen w-full bg-black" />}>
+        <Spline
+          style={{
+            width: "100%",
+            height: "100vh",
+            pointerEvents: "auto",
+          }}
+          scene="https://prod.spline.design/us3ALejTXl6usHZ7/scene.splinecode"
+        />
+      </Suspense>
 
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.9),transparent_35%,transparent_70%,rgba(0,0,0,0.85)),linear-gradient(to_bottom,transparent_45%,rgba(0,0,0,0.95))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.92),rgba(0,0,0,0.2)_42%,rgba(0,0,0,0.03)_70%,rgba(0,0,0,0.7)),linear-gradient(to_bottom,rgba(0,0,0,0.16)_0%,transparent_38%,rgba(0,0,0,0.92)_100%)]" />
     </div>
-  );
+  )
 }
 
-function HeroContent() {
+function HeroContent({ heroContentRef }: { heroContentRef: React.RefObject<HTMLDivElement> }) {
   return (
-    <div className="relative z-10 max-w-3xl pt-32 lg:pt-40">
-      <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-bluefire/25 bg-bluefire/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-cyanfire shadow-[0_0_40px_rgba(26,111,255,0.14)] backdrop-blur-xl">
+    <div ref={heroContentRef} className="pointer-events-auto relative z-20 max-w-4xl pt-32 transition-opacity duration-100 sm:pt-36 lg:pt-44">
+      <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-cyanfire shadow-[0_0_50px_rgba(0,180,255,0.18)] backdrop-blur-2xl">
         <ShieldCheck className="h-4 w-4" />
         NGFW colombiano para seguridad empresarial
       </div>
 
-      <h1 className="font-display text-5xl font-extralight leading-[0.98] tracking-[-0.045em] text-textfire sm:text-6xl lg:text-7xl xl:text-8xl">
-        Firewall de nueva generación con{' '}
+      <h1 className="font-display text-5xl font-extralight leading-[0.95] tracking-[-0.055em] text-textfire drop-shadow-[0_10px_55px_rgba(0,0,0,0.55)] sm:text-6xl lg:text-7xl xl:text-8xl">
+        Firewall de nueva generación con{" "}
         <span className="bg-gradient-to-r from-orangefire via-cyanfire to-bluefire bg-clip-text font-semibold text-transparent">
           visibilidad SOC
         </span>
       </h1>
 
-      <p className="mt-7 max-w-2xl text-base font-light leading-8 text-mutedfire sm:text-lg lg:text-xl">
+      <p className="mt-7 max-w-2xl text-base font-light leading-8 text-mutedfire drop-shadow-[0_6px_26px_rgba(0,0,0,0.65)] sm:text-lg lg:text-xl">
         UltriFire unifica inspección profunda, IPS Analytics, segmentación y control de tráfico en una plataforma NGFW
         diseñada para proteger operaciones críticas sin depender de licencias impredecibles en dólares.
       </p>
-
-      <div className="mt-9 grid max-w-2xl gap-3 sm:grid-cols-3">
-        {securityMetrics.map((metric) => (
-          <div key={metric.label} className="rounded-2xl border border-line/90 bg-white/[0.035] p-4 shadow-border backdrop-blur-md">
-            <p className={`text-2xl font-semibold ${metric.accent}`}>{metric.value}</p>
-            <p className="mt-1 text-xs uppercase tracking-[0.18em] text-mutedfire">{metric.label}</p>
-          </div>
-        ))}
-      </div>
 
       <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
         <a
@@ -65,133 +57,81 @@ function HeroContent() {
         </a>
         <a
           href="#como-funciona"
-          className="focus-ring inline-flex items-center justify-center rounded-xl border border-line bg-night/50 px-7 py-4 text-sm font-semibold text-textfire transition duration-300 hover:border-cyanfire/70 hover:bg-cyanfire/10 hover:text-white motion-reduce:transition-none"
+          className="focus-ring inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/[0.06] px-7 py-4 text-sm font-semibold text-textfire shadow-[0_18px_55px_rgba(0,0,0,0.18)] backdrop-blur-xl transition duration-300 hover:border-cyanfire/70 hover:bg-cyanfire/10 hover:text-white motion-reduce:transition-none"
         >
           Ver plataforma
         </a>
       </div>
     </div>
-  );
+  )
 }
 
-function ScreenshotSection() {
+function ScreenshotSection({ screenshotRef }: { screenshotRef: React.RefObject<HTMLDivElement> }) {
   return (
-    <div className="relative z-10 mt-16 pb-20 lg:mt-0 lg:flex lg:min-h-[42rem] lg:items-end lg:pb-24">
-      <div className="enterprise-panel w-full overflow-hidden rounded-[1.75rem] shadow-[0_34px_120px_rgba(0,0,0,0.45)] lg:translate-x-4 xl:translate-x-10">
-        <div className="flex items-center justify-between border-b border-line/80 bg-[#0A0E16]/88 px-5 py-4">
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full bg-orangefire" />
-            <span className="h-3 w-3 rounded-full bg-bluefire" />
-            <span className="h-3 w-3 rounded-full bg-cyanfire" />
-          </div>
-          <div className="rounded-full border border-cyanfire/20 bg-cyanfire/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyanfire">
-            UltriFire SOC View
-          </div>
-        </div>
-
-        <div className="grid gap-4 p-4 sm:p-5 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-3xl border border-line bg-[#070B14]/88 p-5">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-mutedfire">Firewall Intelligence</p>
-                <h2 className="mt-1 text-2xl font-semibold text-textfire">Tráfico, riesgo e IPS en tiempo real</h2>
-              </div>
-              <div className="hidden rounded-2xl border border-orangefire/20 bg-orangefire/10 p-3 text-orangefire sm:block">
-                <Radar className="h-6 w-6" />
-              </div>
+    <div className="pointer-events-none relative z-10 mx-auto mt-[18vh] w-full max-w-7xl px-5 pb-24 sm:px-8 lg:mt-[16vh] lg:px-10 xl:px-6">
+      <div ref={screenshotRef} className="relative will-change-transform">
+        <div className="absolute -inset-8 rounded-[2.5rem] bg-[radial-gradient(circle_at_50%_10%,rgba(0,180,255,0.28),transparent_45%),radial-gradient(circle_at_10%_90%,rgba(255,90,31,0.16),transparent_35%)] blur-2xl" />
+        <div className="relative overflow-hidden rounded-[1.75rem] border border-white/12 bg-[#070B14]/80 shadow-[0_44px_150px_rgba(0,0,0,0.65)] backdrop-blur-xl">
+          <div className="flex items-center justify-between border-b border-white/10 bg-black/35 px-5 py-4">
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-orangefire" />
+              <span className="h-3 w-3 rounded-full bg-bluefire" />
+              <span className="h-3 w-3 rounded-full bg-cyanfire" />
             </div>
-
-            <div className="relative h-56 overflow-hidden rounded-2xl border border-line bg-[linear-gradient(180deg,rgba(13,20,32,0.96),rgba(6,8,16,0.96))] p-4">
-              <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(26,111,255,0.24)_1px,transparent_1px),linear-gradient(90deg,rgba(26,111,255,0.24)_1px,transparent_1px)] [background-size:28px_28px]" />
-              <div className="relative flex h-full items-end gap-2">
-                {[34, 48, 42, 68, 58, 82, 62, 74, 92, 70, 86, 64].map((height, index) => (
-                  <div key={`${height}-${index}`} className="flex flex-1 flex-col justify-end gap-2">
-                    <div
-                      className="rounded-t-md bg-gradient-to-t from-bluefire via-cyanfire to-textfire shadow-[0_0_24px_rgba(0,180,255,0.24)]"
-                      style={{ height: `${height}%` }}
-                    />
-                    <div className="h-1 rounded-full bg-line" />
-                  </div>
-                ))}
-              </div>
-              <div className="absolute right-4 top-4 rounded-2xl border border-cyanfire/20 bg-night/80 px-4 py-3 backdrop-blur">
-                <p className="text-[10px] uppercase tracking-[0.22em] text-mutedfire">IPS Analytics</p>
-                <p className="mt-1 text-xl font-semibold text-cyanfire">1,284</p>
-              </div>
+            <div className="rounded-full border border-cyanfire/20 bg-cyanfire/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyanfire">
+              UltriFire Platform
             </div>
           </div>
-
-          <div className="grid gap-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-3xl border border-line bg-[#070B14]/88 p-5">
-                <LockKeyhole className="h-6 w-6 text-orangefire" />
-                <p className="mt-4 text-3xl font-semibold text-textfire">0</p>
-                <p className="mt-1 text-xs uppercase tracking-[0.18em] text-mutedfire">Críticos abiertos</p>
-              </div>
-              <div className="rounded-3xl border border-line bg-[#070B14]/88 p-5">
-                <Eye className="h-6 w-6 text-cyanfire" />
-                <p className="mt-4 text-3xl font-semibold text-textfire">360°</p>
-                <p className="mt-1 text-xs uppercase tracking-[0.18em] text-mutedfire">Visibilidad SOC</p>
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-line bg-[#070B14]/88 p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-semibold text-textfire">
-                  <Network className="h-4 w-4 text-cyanfire" />
-                  Interfaces críticas
-                </div>
-                <span className="rounded-full bg-cyanfire/10 px-3 py-1 text-[10px] font-semibold text-cyanfire">ONLINE</span>
-              </div>
-              <div className="space-y-3">
-                {interfaces.map((item) => (
-                  <div key={item.name} className="flex items-center justify-between rounded-2xl border border-line/70 bg-white/[0.025] px-4 py-3">
-                    <div>
-                      <p className="text-sm font-semibold text-textfire">{item.name}</p>
-                      <p className="text-xs text-mutedfire">{item.traffic}</p>
-                    </div>
-                    <span className="rounded-full border border-cyanfire/30 bg-cyanfire/10 px-2.5 py-1 text-[10px] font-bold text-cyanfire">{item.status}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-line bg-[linear-gradient(135deg,rgba(255,90,31,0.13),rgba(26,111,255,0.14))] p-5">
-              <div className="flex items-center gap-3">
-                <div className="rounded-2xl bg-night/70 p-3 text-orangefire">
-                  <Server className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-textfire">Políticas NGFW sincronizadas</p>
-                  <p className="text-xs text-mutedfire">Control granular de apps, usuarios y segmentos.</p>
-                </div>
-                <Zap className="ml-auto h-5 w-5 text-cyanfire" />
-              </div>
-              <div className="mt-4 h-2 overflow-hidden rounded-full bg-night/70">
-                <div className="h-full w-[87%] rounded-full bg-gradient-to-r from-orangefire via-bluefire to-cyanfire" />
-              </div>
-            </div>
-          </div>
+          <img
+            src={SCREENSHOT_URL}
+            alt="Vista de la plataforma UltriFire"
+            className="block aspect-[16/9] w-full object-cover"
+            loading="eager"
+          />
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export function Hero() {
+  const heroContentRef = useRef<HTMLDivElement>(null)
+  const screenshotRef = useRef<HTMLDivElement>(null)
+  const [scrollPosition, setScrollPosition] = useState(0)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY
+      setScrollPosition(scrollPosition)
+
+      if (screenshotRef.current) {
+        screenshotRef.current.style.transform = `translateY(-${scrollPosition * 0.5}px)`
+      }
+
+      if (heroContentRef.current) {
+        const maxScroll = 400
+        const opacity = 1 - Math.min(scrollPosition / maxScroll, 1)
+        heroContentRef.current.style.opacity = opacity.toString()
+      }
+    }
+
+    handleScroll()
+    window.addEventListener("scroll", handleScroll, { passive: true })
+
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   return (
-    <section id="inicio" className="relative min-h-screen overflow-hidden bg-night text-white">
-      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
-        <HeroSplineBackground />
+    <section id="inicio" data-scroll-position={scrollPosition} className="relative min-h-[155vh] overflow-hidden bg-black text-white">
+      <HeroSplineBackground />
+      <div className="relative z-10 mx-auto min-h-screen max-w-7xl px-5 sm:px-8 lg:px-10 xl:px-6">
+        <HeroContent heroContentRef={heroContentRef} />
       </div>
-      <div className="relative mx-auto grid min-h-screen max-w-7xl gap-8 px-5 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:px-10 xl:px-6">
-        <HeroContent />
-        <ScreenshotSection />
-      </div>
-      <div className="pointer-events-none absolute bottom-10 left-1/2 z-10 hidden -translate-x-1/2 items-center gap-2 text-xs uppercase tracking-[0.24em] text-mutedfire lg:flex">
+      <ScreenshotSection screenshotRef={screenshotRef} />
+      <div className="pointer-events-none absolute bottom-[45vh] left-1/2 z-20 hidden -translate-x-1/2 items-center gap-2 text-xs uppercase tracking-[0.24em] text-mutedfire lg:flex">
         <Activity className="h-4 w-4 text-cyanfire" />
         Monitoreo continuo de perímetro, red y aplicaciones
       </div>
     </section>
-  );
+  )
 }
