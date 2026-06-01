@@ -1,14 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
 import './globals.css';
-
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['200', '300', '400', '500', '600'],
-  variable: '--font-inter',
-  display: 'swap'
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ultrifire.co'),
@@ -48,7 +40,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="es">
-      <body className={`${inter.variable} font-sans antialiased`}>{children}</body>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   );
 }
