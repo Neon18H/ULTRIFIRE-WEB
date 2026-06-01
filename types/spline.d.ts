@@ -10,3 +10,7 @@ declare module '@splinetool/react-spline' {
 
   export default Spline;
 }
+
+declare module '@splinetool/react-spline/next' {
+  export { default } from '@splinetool/react-spline';
+}

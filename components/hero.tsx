@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { Activity, ArrowRight, Eye, LockKeyhole, Network, Radar, Server, ShieldCheck, Zap } from 'lucide-react';
 
-const Spline = dynamic(() => import('@splinetool/react-spline'), {
+const Spline = dynamic(() => import('@splinetool/react-spline/next'), {
   ssr: false,
   loading: () => <div className="h-full w-full animate-pulse bg-[radial-gradient(circle_at_center,rgba(26,111,255,0.24),transparent_56%)]" />
 });
