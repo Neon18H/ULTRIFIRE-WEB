@@ -1,14 +1,4 @@
-'use client';
-
-import dynamic from 'next/dynamic';
 import { Activity, ArrowRight, Eye, LockKeyhole, Network, Radar, Server, ShieldCheck, Zap } from 'lucide-react';
-
-const Spline = dynamic(() => import('@splinetool/react-spline/next'), {
-  ssr: false,
-  loading: () => <div className="h-full w-full animate-pulse bg-[radial-gradient(circle_at_center,rgba(26,111,255,0.24),transparent_56%)]" />
-});
-
-const SPLINE_SCENE_URL = 'https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode';
 
 const securityMetrics = [
   { label: 'Amenazas bloqueadas', value: '98.7%', accent: 'text-cyanfire' },
@@ -24,14 +14,14 @@ const interfaces = [
 
 function HeroSplineBackground() {
   return (
-    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_22%,rgba(26,111,255,0.24),transparent_34rem),radial-gradient(circle_at_18%_78%,rgba(255,90,31,0.12),transparent_28rem),linear-gradient(180deg,#060810_0%,#07101f_52%,#060810_100%)]" />
-      <div className="hero-cyber-grid opacity-40" />
-      <div className="absolute right-[-22rem] top-[-8rem] hidden h-[58rem] w-[58rem] opacity-45 blur-[1px] lg:block xl:opacity-60">
-        <Spline scene={SPLINE_SCENE_URL} className="h-full w-full scale-110" />
-      </div>
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(6,8,16,0.98)_0%,rgba(6,8,16,0.86)_38%,rgba(6,8,16,0.56)_68%,rgba(6,8,16,0.32)_100%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-night via-night/82 to-transparent" />
+    <div className="relative h-screen w-full overflow-hidden">
+      <iframe
+        src="https://my.spline.design/us3ALejTXl6usHZ7/"
+        className="h-full w-full border-0"
+        allowFullScreen
+      />
+
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.9),transparent_35%,transparent_70%,rgba(0,0,0,0.85)),linear-gradient(to_bottom,transparent_45%,rgba(0,0,0,0.95))]" />
     </div>
   );
 }
@@ -191,7 +181,9 @@ function ScreenshotSection() {
 export function Hero() {
   return (
     <section id="inicio" className="relative min-h-screen overflow-hidden bg-night text-white">
-      <HeroSplineBackground />
+      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+        <HeroSplineBackground />
+      </div>
       <div className="relative mx-auto grid min-h-screen max-w-7xl gap-8 px-5 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:px-10 xl:px-6">
         <HeroContent />
         <ScreenshotSection />
