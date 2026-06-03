@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
+import { ShaderAnimation } from "@/components/ui/shader-animation"
 import {
   Activity,
   AlertTriangle,
@@ -53,69 +54,6 @@ const devices = [
   { label: "Warning", value: 4, color: "bg-orangefire", text: "text-orangefire" },
   { label: "Offline", value: 2, color: "bg-red-500", text: "text-red-300" },
 ]
-
-function CyberFallbackBackground() {
-  const particles = Array.from({ length: 20 }, (_, index) => ({
-    index,
-    left: `${(index * 37) % 100}%`,
-    top: `${(index * 19) % 100}%`,
-    delay: `${(index % 7) * 0.35}s`,
-    duration: `${4 + (index % 5)}s`,
-  }))
-
-  return (
-    <div className="absolute inset-0 h-screen w-full overflow-hidden bg-black" aria-hidden="true">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_42%,rgba(255,42,42,0.32),transparent_22%),radial-gradient(circle_at_70%_34%,rgba(0,180,255,0.18),transparent_24%),linear-gradient(115deg,rgba(0,0,0,0.95)_0%,rgba(20,4,8,0.85)_46%,rgba(0,0,0,0.98)_100%)]" />
-      <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(rgba(255,255,255,0.055)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.055)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(circle_at_center,black,transparent_76%)]" />
-      <div className="absolute left-1/2 top-[43%] h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-orangefire/20 blur-[120px] cyber-breathe" />
-      <div className="absolute right-[12%] top-[18%] h-56 w-56 rounded-full border border-cyanfire/20 bg-cyanfire/[0.035] blur-sm cyber-orbit" />
-      <div className="absolute left-[58%] top-[23%] h-[22rem] w-[22rem] -translate-x-1/2 rounded-[3rem] border border-white/10 bg-[linear-gradient(135deg,rgba(255,90,31,0.18),rgba(0,180,255,0.05)_48%,rgba(255,255,255,0.03))] shadow-[0_0_120px_rgba(255,90,31,0.16)] backdrop-blur-xl cyber-cube">
-        <div className="absolute inset-6 rounded-[2rem] border border-cyanfire/20 bg-black/30" />
-        <div className="absolute left-10 right-10 top-14 h-1 rounded-full bg-gradient-to-r from-transparent via-orangefire to-transparent" />
-        <div className="absolute bottom-12 left-12 right-12 grid grid-cols-3 gap-3">
-          <span className="h-16 rounded-xl border border-white/10 bg-white/[0.04]" />
-          <span className="h-16 rounded-xl border border-orangefire/30 bg-orangefire/[0.08]" />
-          <span className="h-16 rounded-xl border border-cyanfire/25 bg-cyanfire/[0.06]" />
-        </div>
-      </div>
-      {particles.map((particle) => (
-        <span
-          key={particle.index}
-          className="cyber-particle absolute h-1.5 w-1.5 rounded-full bg-cyanfire/70 shadow-[0_0_18px_rgba(0,180,255,0.8)]"
-          style={{ left: particle.left, top: particle.top, animationDelay: particle.delay, animationDuration: particle.duration }}
-        />
-      ))}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.94),rgba(0,0,0,0.44)_42%,rgba(0,0,0,0.16)_70%,rgba(0,0,0,0.72)),linear-gradient(to_bottom,rgba(0,0,0,0.12)_0%,transparent_38%,rgba(0,0,0,0.96)_100%)]" />
-      <style jsx>{`
-        @keyframes cyberBreathe {
-          0%, 100% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.55; }
-          50% { transform: translate(-50%, -50%) scale(1.12); opacity: 0.9; }
-        }
-
-        @keyframes cyberCube {
-          0%, 100% { transform: translateX(-50%) rotateX(58deg) rotateZ(-22deg) translateY(0); }
-          50% { transform: translateX(-50%) rotateX(58deg) rotateZ(-17deg) translateY(-18px); }
-        }
-
-        @keyframes cyberParticle {
-          0% { transform: translate3d(0, 26px, 0) scale(0.6); opacity: 0; }
-          30% { opacity: 1; }
-          100% { transform: translate3d(34px, -84px, 0) scale(1.1); opacity: 0; }
-        }
-
-        @keyframes cyberOrbit {
-          0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-          50% { transform: translate3d(-28px, 18px, 0) scale(1.08); }
-        }
-
-        .cyber-breathe { animation: cyberBreathe 7s ease-in-out infinite; }
-        .cyber-cube { animation: cyberCube 9s ease-in-out infinite; transform-style: preserve-3d; }
-        .cyber-particle { animation-name: cyberParticle; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
-        .cyber-orbit { animation: cyberOrbit 10s ease-in-out infinite; }
-      `}</style>
-    </div>
-  )
-}
 
 function HeroContent({ heroContentRef }: { heroContentRef: React.RefObject<HTMLDivElement> }) {
   return (
@@ -376,11 +314,15 @@ export function Hero() {
 
   return (
     <section id="inicio" data-scroll-position={scrollPosition} className="relative min-h-[155vh] overflow-hidden bg-black text-white">
-      <CyberFallbackBackground />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[120vh] overflow-hidden">
+        <ShaderAnimation />
+        {/* Overlay UltriFire: oscurece la izquierda para lectura y funde el shader hacia la maqueta. */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(6,8,16,0.98)_0%,rgba(6,8,16,0.78)_34%,rgba(6,8,16,0.38)_62%,rgba(6,8,16,0.82)_100%),linear-gradient(to_bottom,rgba(6,8,16,0.10)_0%,rgba(6,8,16,0.16)_42%,rgba(6,8,16,0.88)_86%,#060810_100%)]" aria-hidden="true" />
+      </div>
       <div className="relative z-10 mx-auto min-h-screen max-w-7xl px-5 sm:px-8 lg:px-10 xl:px-6">
         <HeroContent heroContentRef={heroContentRef} />
       </div>
-      <div className="bg-black relative z-10" style={{ marginTop: "-10vh" }}>
+      <div className="relative z-10 bg-black" style={{ marginTop: "-10vh" }}>
         <ScreenshotSection screenshotRef={screenshotRef} />
       </div>
       <div className="pointer-events-none absolute bottom-[45vh] left-1/2 z-20 hidden -translate-x-1/2 items-center gap-2 text-xs uppercase tracking-[0.24em] text-mutedfire lg:flex">
