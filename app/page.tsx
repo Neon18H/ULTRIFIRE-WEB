@@ -1,11 +1,7 @@
-import dynamic from 'next/dynamic';
+import { BelowFoldSections } from '@/components/below-fold-sections';
 import { Footer } from '@/components/footer';
 import { Hero } from '@/components/hero';
 import { Navbar } from '@/components/navbar';
-
-const BelowFoldSections = dynamic(() => import('@/components/below-fold-sections').then((mod) => mod.BelowFoldSections), {
-  loading: () => <div className="min-h-[40vh] bg-[#060810]" />
-});
 
 export default function Home() {
   return (
@@ -17,6 +13,7 @@ export default function Home() {
         <div className="section-cyber-grid" aria-hidden="true" />
         <div className="pointer-events-none absolute inset-x-0 -top-44 z-[1] h-72 bg-gradient-to-b from-night via-[#060810]/94 to-[#060810]" aria-hidden="true" />
         <div className="relative z-10">
+          {/* Las secciones del medio se renderizan de forma directa e independiente de WebGL. */}
           <BelowFoldSections />
         </div>
       </section>
