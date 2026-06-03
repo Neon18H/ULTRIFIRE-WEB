@@ -1,6 +1,14 @@
+'use client';
+
+import dynamic from 'next/dynamic';
 import { Reveal } from './motion-wrapper';
 import { ErrorBoundary } from './ui/error-boundary';
-import { GlobeLive, GlobeLiveFallback } from './ui/cobe-globe-live';
+import { GlobeLiveFallback } from './ui/webgl-fallbacks';
+
+const DynamicGlobeLive = dynamic(() => import('./ui/cobe-globe-live').then((mod) => mod.GlobeLive), {
+  ssr: false,
+  loading: () => <GlobeLiveFallback />
+});
 
 const stats = [
   { value: '36.000M+', label: 'ataques a Colombia en 2024' },
@@ -16,7 +24,7 @@ export function Stats() {
         <Reveal delay={0.12} className="relative order-1 mx-auto w-full max-w-[min(27rem,86vw)] lg:order-2 lg:max-w-xl">
           <div className="absolute inset-x-8 top-1/2 h-px bg-gradient-to-r from-transparent via-[#00B4FF]/30 to-transparent" aria-hidden="true" />
           <ErrorBoundary name="StatsGlobe" fallback={<GlobeLiveFallback />}>
-            <GlobeLive />
+            <DynamicGlobeLive />
           </ErrorBoundary>
           <p className="mt-4 text-center text-[10px] font-semibold uppercase tracking-[0.22em] text-cyanfire sm:mt-5 sm:text-[11px] sm:tracking-[0.32em]">
             Mapa de amenazas globales · tiempo real
