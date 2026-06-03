@@ -13,14 +13,31 @@ const rows = [
 
 export function Comparison() {
   return (
-    <section id="comparativa" className="px-5 py-28 sm:px-8 lg:py-36">
+    <section id="comparativa" className="overflow-hidden px-4 py-16 sm:px-8 sm:py-20 lg:py-36">
       <div className="mx-auto max-w-7xl">
         <SectionHeading
           eyebrow="Comparativa"
           title={<>Rigor empresarial con una ventaja <span className="font-semibold">local</span> decisiva.</>}
           description="UltriFire mantiene una postura técnica seria y elimina fricciones comerciales que bloquean a empresas colombianas: moneda, soporte y dependencia operativa."
         />
-        <Reveal className="overflow-hidden border border-line bg-deep/80 shadow-soft backdrop-blur-xl">
+
+        <Reveal className="grid gap-4 md:hidden">
+          {rows.map(([label, ...values]) => (
+            <article key={label} className="rounded-2xl border border-line bg-deep/80 p-4 shadow-soft backdrop-blur-xl">
+              <h3 className="text-sm font-semibold text-textfire">{label}</h3>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                {values.map((value, index) => (
+                  <div key={`${label}-${vendors[index]}`} className="flex min-h-11 items-center justify-between rounded-xl border border-line/70 bg-white/[0.025] px-3 py-2 text-sm text-mutedfire">
+                    <span className={vendors[index] === 'UltriFire' ? 'font-semibold text-bluefire' : ''}>{vendors[index]}</span>
+                    {value ? <Check className="h-5 w-5 text-bluefire" aria-label="Incluido" /> : <Minus className="h-5 w-5 text-mutedfire/45" aria-label="Limitado" />}
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
+        </Reveal>
+
+        <Reveal className="hidden overflow-hidden border border-line bg-deep/80 shadow-soft backdrop-blur-xl md:block">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left">
               <thead>

@@ -4,12 +4,11 @@ const trustItems = ['Tecnología open source', 'Hecho en Colombia', 'Soporte loc
 
 export function WhyUltrifire() {
   return (
-    <section aria-label="Franja de confianza" className="border-y border-line/80 bg-deep/75 px-5 backdrop-blur-xl py-7 sm:px-8">
-      <Reveal className="mx-auto flex max-w-7xl flex-col gap-4 text-xs uppercase tracking-[0.18em] text-mutedfire/85 md:flex-row md:items-center md:justify-center md:gap-8">
-        {trustItems.map((item, index) => (
-          <div key={item} className="flex items-center gap-4">
+    <section aria-label="Franja de confianza" className="border-y border-line/80 bg-deep/75 px-4 py-7 backdrop-blur-xl sm:px-8">
+      <Reveal className="mx-auto grid max-w-7xl grid-cols-1 gap-3 text-xs uppercase tracking-[0.16em] text-mutedfire/85 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:tracking-[0.18em]">
+        {trustItems.map((item) => (
+          <div key={item} className="flex min-h-11 items-center justify-center rounded-xl border border-line/60 bg-white/[0.02] px-4 text-center md:border-0 md:bg-transparent">
             <span>{item}</span>
-            {index < trustItems.length - 1 ? <span className="hidden h-px w-14 bg-line lg:block" aria-hidden="true" /> : null}
           </div>
         ))}
       </Reveal>
