@@ -1,6 +1,6 @@
 'use client';
 
-import createGlobe, { type COBEOptions } from 'cobe';
+import type { COBEOptions, Globe } from 'cobe';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -51,8 +51,13 @@ function supportsWebGL() {
     return false;
   }
 
-  const canvas = document.createElement('canvas');
-  return Boolean(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
+  try {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    return Boolean(context);
+  } catch {
+    return false;
+  }
 }
 
 function shouldUseStaticGlobe() {
@@ -61,10 +66,38 @@ function shouldUseStaticGlobe() {
   }
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const isMobile = window.matchMedia('(max-width: 639px)').matches;
+  const isNarrowViewport = window.matchMedia('(max-width: 767px)').matches;
+  const userAgent = navigator.userAgent || '';
+  const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  const hardwareConcurrency = navigator.hardwareConcurrency ?? 0;
+  const isLowConcurrencyDevice = hardwareConcurrency > 0 && hardwareConcurrency <= 4;
   const deviceMemory = Number((navigator as Navigator & { deviceMemory?: number }).deviceMemory);
+  const isLowMemoryDevice = Number.isFinite(deviceMemory) && deviceMemory <= 2;
 
-  return reducedMotion || isMobile || Boolean(Number.isFinite(deviceMemory) && deviceMemory <= 2);
+  return reducedMotion || isNarrowViewport || isMobileUserAgent || isLowConcurrencyDevice || isLowMemoryDevice || !supportsWebGL();
+}
+
+
+export function GlobeLiveFallback({ className }: GlobeLiveProps) {
+  return (
+    <div className={cn('relative mx-auto aspect-square w-full max-w-[min(520px,86vw)]', className)}>
+      <div className="absolute inset-6 rounded-full bg-[#1A6FFF]/15 blur-3xl" aria-hidden="true" />
+      <div className="absolute inset-12 rounded-full border border-[#00B4FF]/15 bg-[#060810]/40 shadow-[0_0_80px_rgba(26,111,255,0.22)]" aria-hidden="true" />
+      <div className="relative z-10 grid h-full w-full place-items-center rounded-full border border-[#1A2333] bg-[#0A0E16] text-center shadow-[0_0_80px_rgba(26,111,255,0.18)]">
+        <div className="px-8">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#00B4FF]">Modo seguro</p>
+          <p className="mt-3 text-sm leading-6 text-[#8B9CB3]">Visualización WebGL no disponible. Monitoreo global activo.</p>
+        </div>
+      </div>
+      <div className="pointer-events-none absolute left-3 top-5 z-20 rounded-full border border-[#FF5A1F]/30 bg-[#060810]/80 px-3 py-1.5 shadow-[0_0_30px_rgba(255,90,31,0.18)] backdrop-blur-md sm:left-5 sm:top-8 sm:px-4 sm:py-2">
+        <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-[#FF5A1F] sm:text-[10px] sm:tracking-[0.28em]">En vivo</p>
+      </div>
+      <div className="pointer-events-none absolute bottom-5 right-3 z-20 rounded-full border border-[#00B4FF]/25 bg-[#060810]/80 px-3 py-1.5 text-right shadow-[0_0_30px_rgba(0,180,255,0.14)] backdrop-blur-md sm:bottom-8 sm:right-5 sm:px-4 sm:py-2">
+        <p className="text-xs font-semibold text-[#F0F4FA]">48.7K</p>
+        <p className="text-[10px] uppercase tracking-[0.24em] text-[#8B9CB3]">ataques</p>
+      </div>
+    </div>
+  );
 }
 
 export function GlobeLive({ className }: GlobeLiveProps) {
@@ -81,8 +114,24 @@ export function GlobeLive({ className }: GlobeLiveProps) {
   const liveAttackCount = useMemo(() => '48.7K', []);
 
   useEffect(() => {
-    reducedMotionRef.current = shouldUseStaticGlobe();
-    setCanRenderGlobe(supportsWebGL() && !reducedMotionRef.current);
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mobileQuery = window.matchMedia('(max-width: 767px)');
+
+    const updateMode = () => {
+      reducedMotionRef.current = shouldUseStaticGlobe();
+      setCanRenderGlobe(supportsWebGL() && !reducedMotionRef.current);
+    };
+
+    updateMode();
+    window.addEventListener('resize', updateMode, { passive: true });
+    reducedMotionQuery.addEventListener('change', updateMode);
+    mobileQuery.addEventListener('change', updateMode);
+
+    return () => {
+      window.removeEventListener('resize', updateMode);
+      reducedMotionQuery.removeEventListener('change', updateMode);
+      mobileQuery.removeEventListener('change', updateMode);
+    };
   }, []);
 
   useEffect(() => {
@@ -112,6 +161,11 @@ export function GlobeLive({ className }: GlobeLiveProps) {
       return undefined;
     }
 
+    if (!('IntersectionObserver' in window)) {
+      visibleRef.current = true;
+      return undefined;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         visibleRef.current = entry.isIntersecting;
@@ -130,55 +184,90 @@ export function GlobeLive({ className }: GlobeLiveProps) {
       return undefined;
     }
 
+    let disposed = false;
     let animationFrame = 0;
+    let globe: Globe | null = null;
     let currentPhi = phiRef.current;
-    const devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-    const pixelSize = size * devicePixelRatio;
 
-    const globe = createGlobe(canvas, {
-      devicePixelRatio,
-      width: pixelSize,
-      height: pixelSize,
-      phi: currentPhi,
-      theta: 0.25,
-      dark: 1,
-      diffuse: 1.45,
-      scale: 1,
-      mapSamples: 18000,
-      mapBrightness: 6,
-      mapBaseBrightness: 0.02,
-      baseColor: [0.1, 0.15, 0.25],
-      markerColor: [1, 0.35, 0.12],
-      glowColor: [0.1, 0.25, 0.45],
-      opacity: 0.96,
-      offset: [0, 0],
-      markerElevation: 0.02,
-      markers: ATTACK_MARKERS,
-      arcs: ATTACK_ARCS,
-      arcColor: [1, 0.22, 0.08],
-      arcWidth: 0.7,
-      arcHeight: 0.32
-    });
+    const initGlobe = async () => {
+      try {
+        if (shouldUseStaticGlobe()) {
+          setCanRenderGlobe(false);
+          return;
+        }
 
-    const render = () => {
-      const isAutoRotating = visibleRef.current && !reducedMotionRef.current && pointerRef.current === null;
+        const { default: createGlobe } = await import('cobe');
 
-      if (isAutoRotating) {
-        currentPhi += 0.0032;
+        if (disposed) {
+          return;
+        }
+
+        const devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+        const pixelSize = size * devicePixelRatio;
+
+        // Comentario en español: cobe/WebGL solo se inicializa en desktop con WebGL real.
+        // En móvil se mantiene el placeholder para evitar crashes y ahorrar batería.
+        globe = createGlobe(canvas, {
+          devicePixelRatio,
+          width: pixelSize,
+          height: pixelSize,
+          phi: currentPhi,
+          theta: 0.25,
+          dark: 1,
+          diffuse: 1.45,
+          scale: 1,
+          mapSamples: 18000,
+          mapBrightness: 6,
+          mapBaseBrightness: 0.02,
+          baseColor: [0.1, 0.15, 0.25],
+          markerColor: [1, 0.35, 0.12],
+          glowColor: [0.1, 0.25, 0.45],
+          opacity: 0.96,
+          offset: [0, 0],
+          markerElevation: 0.02,
+          markers: ATTACK_MARKERS,
+          arcs: ATTACK_ARCS,
+          arcColor: [1, 0.22, 0.08],
+          arcWidth: 0.7,
+          arcHeight: 0.32
+        });
+
+        const render = () => {
+          if (!globe || disposed) {
+            return;
+          }
+
+          const isAutoRotating = visibleRef.current && !reducedMotionRef.current && pointerRef.current === null;
+
+          if (isAutoRotating) {
+            currentPhi += 0.0032;
+          }
+
+          currentPhi += pointerVelocityRef.current;
+          pointerVelocityRef.current *= 0.92;
+          phiRef.current = currentPhi;
+          globe.update({ phi: currentPhi, width: pixelSize, height: pixelSize });
+          animationFrame = window.requestAnimationFrame(render);
+        };
+
+        render();
+      } catch (error) {
+        // Comentario en español: si cobe lanza cualquier excepción, no propagamos el error.
+        // El fallback conserva la sección Stats visible y protege el resto de la landing.
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('[GlobeLive] WebGL desactivado por error:', error);
+        }
+        setCanRenderGlobe(false);
       }
-
-      currentPhi += pointerVelocityRef.current;
-      pointerVelocityRef.current *= 0.92;
-      phiRef.current = currentPhi;
-      globe.update({ phi: currentPhi, width: pixelSize, height: pixelSize });
-      animationFrame = window.requestAnimationFrame(render);
     };
 
-    render();
+    void initGlobe();
 
     return () => {
+      disposed = true;
       window.cancelAnimationFrame(animationFrame);
-      globe.destroy();
+      globe?.destroy();
+      globe = null;
     };
   }, [canRenderGlobe, size]);
 
