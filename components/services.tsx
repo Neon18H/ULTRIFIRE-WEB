@@ -38,29 +38,29 @@ const services = [
 
 export function Services() {
   return (
-    <section id="servicios" className="relative overflow-hidden px-5 py-28 sm:px-8 lg:py-36">
-      <div className="absolute right-0 top-28 h-[32rem] w-[32rem] rounded-full bg-bluefire/8 blur-[140px]" aria-hidden="true" />
+    <section id="servicios" className="relative overflow-hidden px-4 py-16 sm:px-8 sm:py-20 lg:py-36">
+      <div className="absolute right-[-10rem] top-20 h-[22rem] w-[22rem] rounded-full bg-bluefire/8 blur-[110px] sm:right-0 sm:top-28 sm:h-[32rem] sm:w-[32rem] sm:blur-[140px]" aria-hidden="true" />
       <div className="relative mx-auto max-w-7xl">
         <SectionHeading
           eyebrow="Servicios"
           title={<>Arquitectura <span className="font-semibold">sobria</span> para cada punto de entrada.</>}
           description="UltriFire combina appliances, firewall virtual, perímetro cloud gestionado y una plataforma SaaS para reducir complejidad sin sacrificar control."
         />
-        <div id="productos" className="grid gap-5 lg:grid-cols-2">
+        <div id="productos" className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-2">
           {services.map((service, index) => (
-            <Reveal key={service.title} delay={index * 0.06} className={cn('group enterprise-panel relative overflow-hidden p-8 transition duration-300 hover:-translate-y-1 hover:border-bluefire/70 hover:shadow-[0_30px_110px_rgba(26,111,255,0.12)] lg:p-10', service.highlight ? 'border-orangefire/45 lg:row-span-2' : '')}>
-              {service.highlight ? <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-orangefire/[0.045] blur-[80px]" aria-hidden="true" /> : null}
+            <Reveal key={service.title} delay={index * 0.06} className={cn('group enterprise-panel relative overflow-hidden p-5 transition duration-300 hover:-translate-y-1 hover:border-bluefire/70 hover:shadow-[0_30px_110px_rgba(26,111,255,0.12)] sm:p-6 lg:p-10', service.highlight ? 'border-orangefire/45 lg:row-span-2' : '')}>
+              {service.highlight ? <div className="absolute right-[-4rem] top-0 h-52 w-52 rounded-full bg-orangefire/[0.06] blur-[70px] sm:right-0 sm:h-64 sm:w-64 sm:blur-[80px]" aria-hidden="true" /> : null}
               <div className="relative">
-                <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
+                <div className="mb-7 flex flex-wrap items-start justify-between gap-4 sm:mb-10">
                   <div className="border border-line p-3 text-cyanfire transition group-hover:border-bluefire/50 group-hover:text-[#5B9BFF]">
                     <service.icon className="h-6 w-6 stroke-[1.35]" aria-hidden="true" />
                   </div>
                   {service.badge ? <span className="border border-orangefire/35 bg-orangefire/[0.035] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-orangefire">{service.badge}</span> : null}
                 </div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-mutedfire">{service.subtitle}</p>
-                <h3 className="mt-4 text-3xl font-light tracking-[-0.02em] text-textfire lg:text-4xl"><span className="font-semibold">{service.title}</span></h3>
-                <p className="mt-5 max-w-2xl text-base font-light leading-7 text-mutedfire">{service.description}</p>
-                <ul className="mt-9 grid gap-4">
+                <h3 className="mt-3 text-2xl font-light tracking-[-0.02em] text-textfire sm:mt-4 sm:text-3xl lg:text-4xl"><span className="font-semibold">{service.title}</span></h3>
+                <p className="mt-4 max-w-2xl text-sm font-light leading-7 text-mutedfire sm:mt-5 sm:text-base">{service.description}</p>
+                <ul className="mt-7 grid gap-3 sm:mt-9 sm:gap-4">
                   {service.features.map((feature) => (
                     <li key={feature} className="flex gap-3 text-sm leading-6 text-mutedfire">
                       <Check className="mt-1 h-4 w-4 shrink-0 text-bluefire" aria-hidden="true" />

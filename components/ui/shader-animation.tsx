@@ -1,27 +1,45 @@
-"use client"
+'use client';
 
-import { useEffect, useRef } from "react"
-import * as THREE from "three"
+import { useEffect, useRef, useState } from 'react';
+import * as THREE from 'three';
 
 export function ShaderAnimation() {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
-    camera: THREE.Camera
-    scene: THREE.Scene
-    renderer: THREE.WebGLRenderer
-    uniforms: any
-    animationId: number
-  } | null>(null)
+    camera: THREE.Camera;
+    scene: THREE.Scene;
+    renderer: THREE.WebGLRenderer;
+    uniforms: { time: { value: number }; resolution: { value: THREE.Vector2 } };
+    animationId: number;
+  } | null>(null);
+  const [useStaticFallback, setUseStaticFallback] = useState(true);
 
   useEffect(() => {
-    if (!containerRef.current) return
-    const container = containerRef.current
+    const updateMode = () => {
+      const isSmallScreen = window.matchMedia('(max-width: 639px)').matches;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      setUseStaticFallback(isSmallScreen || reducedMotion);
+    };
+
+    updateMode();
+    window.addEventListener('resize', updateMode, { passive: true });
+    window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', updateMode);
+
+    return () => {
+      window.removeEventListener('resize', updateMode);
+      window.matchMedia('(prefers-reduced-motion: reduce)').removeEventListener('change', updateMode);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current || useStaticFallback) return;
+    const container = containerRef.current;
 
     const vertexShader = `
       void main() {
         gl_Position = vec4( position, 1.0 );
       }
-    `
+    `;
 
     const fragmentShader = `
       #define TWO_PI 6.2831853072
@@ -41,68 +59,67 @@ export function ShaderAnimation() {
         }
         gl_FragColor = vec4(color[0],color[1],color[2],1.0);
       }
-    `
+    `;
 
-    const camera = new THREE.Camera()
-    camera.position.z = 1
-    const scene = new THREE.Scene()
-    const geometry = new THREE.PlaneGeometry(2, 2)
+    const camera = new THREE.Camera();
+    camera.position.z = 1;
+    const scene = new THREE.Scene();
+    const geometry = new THREE.PlaneGeometry(2, 2);
     const uniforms = {
-      time: { type: "f", value: 1.0 },
-      resolution: { type: "v2", value: new THREE.Vector2() },
-    }
+      time: { value: 1.0 },
+      resolution: { value: new THREE.Vector2() }
+    };
     const material = new THREE.ShaderMaterial({
-      uniforms: uniforms,
-      vertexShader: vertexShader,
-      fragmentShader: fragmentShader,
-    })
-    const mesh = new THREE.Mesh(geometry, material)
-    scene.add(mesh)
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    container.appendChild(renderer.domElement)
+      uniforms,
+      vertexShader,
+      fragmentShader
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    container.appendChild(renderer.domElement);
 
     const onWindowResize = () => {
-      const width = container.clientWidth
-      const height = container.clientHeight
-      renderer.setSize(width, height)
-      uniforms.resolution.value.x = renderer.domElement.width
-      uniforms.resolution.value.y = renderer.domElement.height
-    }
-    onWindowResize()
-    window.addEventListener("resize", onWindowResize, false)
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      renderer.setSize(width, height);
+      uniforms.resolution.value.x = renderer.domElement.width;
+      uniforms.resolution.value.y = renderer.domElement.height;
+    };
+    onWindowResize();
+    window.addEventListener('resize', onWindowResize, false);
 
     const animate = () => {
-      const animationId = requestAnimationFrame(animate)
-      uniforms.time.value += 0.05
-      renderer.render(scene, camera)
+      const animationId = requestAnimationFrame(animate);
+      uniforms.time.value += 0.05;
+      renderer.render(scene, camera);
       if (sceneRef.current) {
-        sceneRef.current.animationId = animationId
+        sceneRef.current.animationId = animationId;
       }
-    }
+    };
 
-    sceneRef.current = { camera, scene, renderer, uniforms, animationId: 0 }
-    animate()
+    sceneRef.current = { camera, scene, renderer, uniforms, animationId: 0 };
+    animate();
 
     return () => {
-      window.removeEventListener("resize", onWindowResize)
+      window.removeEventListener('resize', onWindowResize);
       if (sceneRef.current) {
-        cancelAnimationFrame(sceneRef.current.animationId)
-        if (container && sceneRef.current.renderer.domElement) {
-          container.removeChild(sceneRef.current.renderer.domElement)
+        cancelAnimationFrame(sceneRef.current.animationId);
+        if (container.contains(sceneRef.current.renderer.domElement)) {
+          container.removeChild(sceneRef.current.renderer.domElement);
         }
-        sceneRef.current.renderer.dispose()
-        geometry.dispose()
-        material.dispose()
+        sceneRef.current.renderer.dispose();
+        geometry.dispose();
+        material.dispose();
+        sceneRef.current = null;
       }
-    }
-  }, [])
+    };
+  }, [useStaticFallback]);
 
   return (
-    <div
-      ref={containerRef}
-      className="absolute inset-0 w-full h-full"
-      style={{ background: "#000", overflow: "hidden" }}
-    />
-  )
+    <div ref={containerRef} className="hero-static-bg absolute inset-0 h-full w-full overflow-hidden">
+      {useStaticFallback ? <div className="hero-cyber-grid" aria-hidden="true" /> : null}
+    </div>
+  );
 }

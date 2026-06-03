@@ -61,9 +61,10 @@ function shouldUseStaticGlobe() {
   }
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isMobile = window.matchMedia('(max-width: 639px)').matches;
   const deviceMemory = Number((navigator as Navigator & { deviceMemory?: number }).deviceMemory);
 
-  return reducedMotion || Boolean(Number.isFinite(deviceMemory) && deviceMemory <= 2);
+  return reducedMotion || isMobile || Boolean(Number.isFinite(deviceMemory) && deviceMemory <= 2);
 }
 
 export function GlobeLive({ className }: GlobeLiveProps) {
@@ -74,14 +75,14 @@ export function GlobeLive({ className }: GlobeLiveProps) {
   const pointerVelocityRef = useRef(0);
   const visibleRef = useRef(false);
   const reducedMotionRef = useRef(true);
-  const [size, setSize] = useState(420);
+  const [size, setSize] = useState(320);
   const [canRenderGlobe, setCanRenderGlobe] = useState<boolean | null>(null);
 
   const liveAttackCount = useMemo(() => '48.7K', []);
 
   useEffect(() => {
     reducedMotionRef.current = shouldUseStaticGlobe();
-    setCanRenderGlobe(supportsWebGL());
+    setCanRenderGlobe(supportsWebGL() && !reducedMotionRef.current);
   }, []);
 
   useEffect(() => {
@@ -91,12 +92,12 @@ export function GlobeLive({ className }: GlobeLiveProps) {
     }
 
     if (!('ResizeObserver' in window)) {
-      setSize(Math.max(260, Math.min(wrapper.clientWidth, 520)));
+      setSize(Math.max(220, Math.min(wrapper.clientWidth, 520)));
       return undefined;
     }
 
     const resizeObserver = new ResizeObserver(([entry]) => {
-      const nextSize = Math.max(260, Math.min(entry.contentRect.width, 520));
+      const nextSize = Math.max(220, Math.min(entry.contentRect.width, 520));
       setSize(Math.round(nextSize));
     });
 
@@ -204,7 +205,7 @@ export function GlobeLive({ className }: GlobeLiveProps) {
   }
 
   return (
-    <div ref={wrapperRef} className={cn('relative mx-auto aspect-square w-full max-w-[520px]', className)}>
+    <div ref={wrapperRef} className={cn('relative mx-auto aspect-square w-full max-w-[min(520px,86vw)]', className)}>
       <div className="absolute inset-6 rounded-full bg-[#1A6FFF]/15 blur-3xl" aria-hidden="true" />
       <div className="absolute inset-12 rounded-full border border-[#00B4FF]/15 bg-[#060810]/40 shadow-[0_0_80px_rgba(26,111,255,0.22)]" aria-hidden="true" />
 
@@ -230,10 +231,10 @@ export function GlobeLive({ className }: GlobeLiveProps) {
         </div>
       )}
 
-      <div className="pointer-events-none absolute left-5 top-8 z-20 rounded-full border border-[#FF5A1F]/30 bg-[#060810]/80 px-4 py-2 shadow-[0_0_30px_rgba(255,90,31,0.18)] backdrop-blur-md">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#FF5A1F]">En vivo</p>
+      <div className="pointer-events-none absolute left-3 top-5 z-20 rounded-full border border-[#FF5A1F]/30 bg-[#060810]/80 px-3 py-1.5 shadow-[0_0_30px_rgba(255,90,31,0.18)] backdrop-blur-md sm:left-5 sm:top-8 sm:px-4 sm:py-2">
+        <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-[#FF5A1F] sm:text-[10px] sm:tracking-[0.28em]">En vivo</p>
       </div>
-      <div className="pointer-events-none absolute bottom-8 right-5 z-20 rounded-full border border-[#00B4FF]/25 bg-[#060810]/80 px-4 py-2 text-right shadow-[0_0_30px_rgba(0,180,255,0.14)] backdrop-blur-md">
+      <div className="pointer-events-none absolute bottom-5 right-3 z-20 rounded-full border border-[#00B4FF]/25 bg-[#060810]/80 px-3 py-1.5 text-right shadow-[0_0_30px_rgba(0,180,255,0.14)] backdrop-blur-md sm:bottom-8 sm:right-5 sm:px-4 sm:py-2">
         <p className="text-xs font-semibold text-[#F0F4FA]">{liveAttackCount}</p>
         <p className="text-[10px] uppercase tracking-[0.24em] text-[#8B9CB3]">ataques</p>
       </div>

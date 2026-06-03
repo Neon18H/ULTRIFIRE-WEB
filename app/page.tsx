@@ -9,7 +9,7 @@ const BelowFoldSections = dynamic(() => import('@/components/below-fold-sections
 
 export default function Home() {
   return (
-    <main className="relative overflow-hidden bg-night">
+    <main className="relative overflow-x-hidden bg-night">
       <Navbar />
       <Hero />
       <section className="premium-section-bg relative overflow-hidden bg-[#060810]" aria-label="Contenido UltriFire">
