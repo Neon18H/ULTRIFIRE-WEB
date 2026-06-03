@@ -1,8 +1,9 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import React, { useEffect, useRef, useState } from 'react';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
-import { CyberFallbackBackground, ShaderAnimation } from '@/components/ui/shader-animation';
+import { CyberFallbackBackground } from '@/components/ui/webgl-fallbacks';
 import {
   Activity,
   AlertTriangle,
@@ -55,6 +56,11 @@ const devices = [
   { label: 'Warning', value: 4, color: 'bg-orangefire', text: 'text-orangefire' },
   { label: 'Offline', value: 2, color: 'bg-red-500', text: 'text-red-300' }
 ];
+
+const DynamicShaderAnimation = dynamic(() => import('@/components/ui/shader-animation').then((mod) => mod.ShaderAnimation), {
+  ssr: false,
+  loading: () => <CyberFallbackBackground />
+});
 
 function HeroContent({ heroContentRef }: { heroContentRef: React.RefObject<HTMLDivElement> }) {
   return (
@@ -327,7 +333,7 @@ export function Hero() {
     <section id="inicio" data-scroll-position={scrollPosition} className="relative overflow-hidden bg-black text-white lg:min-h-[155vh]">
       <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-full min-h-[760px] overflow-hidden lg:h-[120vh]">
         <ErrorBoundary name="HeroShader" fallback={<CyberFallbackBackground />}>
-          <ShaderAnimation />
+          <DynamicShaderAnimation />
         </ErrorBoundary>
         {/* Overlay UltriFire: oscurece la izquierda para lectura y funde el shader hacia la maqueta. */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(6,8,16,0.98)_0%,rgba(6,8,16,0.84)_42%,rgba(6,8,16,0.62)_68%,rgba(6,8,16,0.88)_100%),linear-gradient(to_bottom,rgba(6,8,16,0.10)_0%,rgba(6,8,16,0.18)_42%,rgba(6,8,16,0.88)_86%,#060810_100%)]" aria-hidden="true" />

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { CyberFallbackBackground } from '@/components/ui/webgl-fallbacks';
 
 function canUseWebGL() {
   if (typeof document === 'undefined') {
@@ -29,14 +30,6 @@ function shouldDisableWebGLOnThisDevice() {
   const isLowConcurrencyDevice = hardwareConcurrency > 0 && hardwareConcurrency <= 4;
 
   return reducedMotion || isNarrowViewport || isMobileUserAgent || isLowConcurrencyDevice || !canUseWebGL();
-}
-
-export function CyberFallbackBackground() {
-  return (
-    <div className="hero-static-bg absolute inset-0 h-full w-full overflow-hidden" aria-hidden="true">
-      <div className="hero-cyber-grid" />
-    </div>
-  );
 }
 
 export function ShaderAnimation() {
