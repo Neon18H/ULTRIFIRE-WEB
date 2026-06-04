@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { motion, useReducedMotion, useInView } from 'framer-motion';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 type RevealProps = {
@@ -10,38 +9,72 @@ type RevealProps = {
   delay?: number;
 };
 
+/**
+ * Reveal a prueba de fallos:
+ * - El contenido SIEMPRE es visible por defecto. Si el JS no corre o el observer no
+ *   dispara (móvil), el contenido se ve igual. NUNCA queda oculto.
+ * - La animación de entrada es una MEJORA progresiva: solo si el JS monta y el
+ *   elemento entra en viewport, aplica una transición suave desde abajo.
+ * - Respeta prefers-reduced-motion.
+ */
 export function Reveal({ children, className, delay = 0 }: RevealProps) {
-  const shouldReduceMotion = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '0px 0px -10% 0px' });
-  const [forceVisible, setForceVisible] = useState(false);
+  const [animateIn, setAnimateIn] = useState(false);
+  const [enhanced, setEnhanced] = useState(false);
 
-  // Respaldo de seguridad: si el observer no dispara (layouts móviles, alturas grandes),
-  // forzamos visibilidad tras montar para que el contenido nunca quede invisible.
   useEffect(() => {
-    const timeout = setTimeout(() => setForceVisible(true), 600);
-    return () => clearTimeout(timeout);
+    // Solo activamos el modo animado si el JS corre y no hay reduce-motion.
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      setEnhanced(false);
+      return;
+    }
+
+    setEnhanced(true);
+
+    const el = ref.current;
+    if (!el) return;
+
+    // IntersectionObserver nativo: no dependemos de Framer Motion para visibilidad.
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setAnimateIn(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.01 },
+    );
+
+    observer.observe(el);
+
+    // Respaldo: si por cualquier motivo no dispara, forzamos la visibilidad.
+    const timeout = setTimeout(() => {
+      setAnimateIn(true);
+      observer.disconnect();
+    }, 700);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timeout);
+    };
   }, []);
 
-  const visible = isInView || forceVisible;
-
-  if (shouldReduceMotion) {
-    return (
-      <div ref={ref} className={cn(className)}>
-        {children}
-      </div>
-    );
-  }
+  // CLAVE: si NO está enhanced (SSR, sin JS o reduce-motion), no inyectamos estilos
+  // de ocultación. El HTML inicial nace visible y la animación es solo progresiva.
+  const style: CSSProperties = enhanced
+    ? {
+        opacity: animateIn ? 1 : 0,
+        transform: animateIn ? 'translateY(0)' : 'translateY(18px)',
+        transition: `opacity 0.7s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.7s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
+      }
+    : {};
 
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 18 }}
-      animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
-      transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1], delay }}
-      className={cn(className)}
-    >
+    <div ref={ref} className={cn(className)} style={style}>
       {children}
-    </motion.div>
+    </div>
   );
 }
