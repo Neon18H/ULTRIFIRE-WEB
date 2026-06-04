@@ -1,21 +1,23 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { motion, useInView, useReducedMotion, type HTMLMotionProps } from 'framer-motion';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { motion, useReducedMotion, useInView } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-type RevealProps = HTMLMotionProps<'div'> & {
+type RevealProps = {
+  children: ReactNode;
+  className?: string;
   delay?: number;
 };
 
-export function Reveal({ children, className, delay = 0, ...props }: RevealProps) {
+export function Reveal({ children, className, delay = 0 }: RevealProps) {
   const shouldReduceMotion = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px -10% 0px' });
   const [forceVisible, setForceVisible] = useState(false);
 
-  // Respaldo de seguridad: si por cualquier razón el observer no dispara
-  // (layouts móviles, alturas grandes), forzamos visibilidad tras montar.
+  // Respaldo de seguridad: si el observer no dispara (layouts móviles, alturas grandes),
+  // forzamos visibilidad tras montar para que el contenido nunca quede invisible.
   useEffect(() => {
     const timeout = setTimeout(() => setForceVisible(true), 600);
     return () => clearTimeout(timeout);
@@ -38,7 +40,6 @@ export function Reveal({ children, className, delay = 0, ...props }: RevealProps
       animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
       transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1], delay }}
       className={cn(className)}
-      {...props}
     >
       {children}
     </motion.div>

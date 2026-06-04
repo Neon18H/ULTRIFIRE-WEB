@@ -3,7 +3,9 @@ const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
   reactStrictMode: true,
-  optimizePackageImports: ['lucide-react']
+  experimental: {
+    optimizePackageImports: ['lucide-react']
+  }
 };
 
 export default nextConfig;
