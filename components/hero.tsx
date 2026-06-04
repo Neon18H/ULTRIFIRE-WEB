@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import React, { useEffect, useRef, useState } from 'react';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { CyberFallbackBackground } from '@/components/ui/webgl-fallbacks';
 import {
   Activity,
@@ -156,13 +157,13 @@ function ScreenshotSection({ screenshotRef }: { screenshotRef: React.RefObject<H
                 </div>
               </div>
 
-              <nav className="mt-4 flex gap-2 overflow-x-auto pb-2 lg:mt-7 lg:grid lg:gap-1.5 lg:overflow-visible lg:pb-0" aria-label="Menú de maqueta">
+              <nav className="mt-4 grid grid-cols-2 gap-2 pb-1 sm:grid-cols-3 lg:mt-7 lg:grid-cols-1 lg:gap-1.5 lg:pb-0" aria-label="Menú de maqueta">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <div key={item.label} className={`flex min-w-max items-center gap-2 rounded-xl px-3 py-3 text-xs transition sm:text-sm lg:min-w-0 lg:gap-3 ${item.active ? 'border border-cyanfire/25 bg-cyanfire/10 text-white shadow-[0_0_34px_rgba(0,180,255,0.08)]' : 'text-mutedfire'}`}>
+                    <div key={item.label} className={`flex min-w-0 items-center gap-2 rounded-xl px-3 py-3 text-xs transition sm:text-sm lg:gap-3 ${item.active ? 'border border-cyanfire/25 bg-cyanfire/10 text-white shadow-[0_0_34px_rgba(0,180,255,0.08)]' : 'text-mutedfire'}`}>
                       <Icon className="h-4 w-4 shrink-0" />
-                      <span>{item.label}</span>
+                      <span className="truncate">{item.label}</span>
                     </div>
                   );
                 })}
@@ -284,23 +285,34 @@ function ScreenshotSection({ screenshotRef }: { screenshotRef: React.RefObject<H
 export function Hero() {
   const heroContentRef = useRef<HTMLDivElement>(null);
   const screenshotRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const [mounted, setMounted] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const canRenderWebGL = mounted && !isMobile;
 
   useEffect(() => {
-    const mobileQuery = window.matchMedia('(max-width: 1023px)');
-    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setMounted(true);
+  }, []);
 
+  useEffect(() => {
     const resetTransforms = () => {
       if (screenshotRef.current) screenshotRef.current.style.transform = '';
       if (heroContentRef.current) heroContentRef.current.style.opacity = '1';
     };
 
+    // En móvil no registramos handlers de scroll: la maqueta queda estática y WebGL no se monta.
+    if (!mounted || isMobile) {
+      resetTransforms();
+      return undefined;
+    }
+
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
     const handleScroll = () => {
       const nextScrollPosition = window.scrollY;
       setScrollPosition(nextScrollPosition);
 
-      // El parallax se desactiva en móvil/tablet y con reduced-motion para evitar saltos de scroll.
-      if (mobileQuery.matches || reducedMotionQuery.matches) {
+      if (reducedMotionQuery.matches) {
         resetTransforms();
         return;
       }
@@ -318,23 +330,24 @@ export function Hero() {
 
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
-    mobileQuery.addEventListener('change', handleScroll);
     reducedMotionQuery.addEventListener('change', handleScroll);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      mobileQuery.removeEventListener('change', handleScroll);
       reducedMotionQuery.removeEventListener('change', handleScroll);
       resetTransforms();
     };
-  }, []);
+  }, [isMobile, mounted]);
 
   return (
     <section id="inicio" data-scroll-position={scrollPosition} className="relative overflow-hidden bg-black text-white lg:min-h-[155vh]">
       <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-full min-h-[760px] overflow-hidden lg:h-[120vh]">
-        <ErrorBoundary name="HeroShader" fallback={<CyberFallbackBackground />}>
-          <DynamicShaderAnimation />
-        </ErrorBoundary>
+        <CyberFallbackBackground />
+        {canRenderWebGL ? (
+          <ErrorBoundary name="HeroShader" fallback={<CyberFallbackBackground />}>
+            <DynamicShaderAnimation />
+          </ErrorBoundary>
+        ) : null}
         {/* Overlay UltriFire: oscurece la izquierda para lectura y funde el shader hacia la maqueta. */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(6,8,16,0.98)_0%,rgba(6,8,16,0.84)_42%,rgba(6,8,16,0.62)_68%,rgba(6,8,16,0.88)_100%),linear-gradient(to_bottom,rgba(6,8,16,0.10)_0%,rgba(6,8,16,0.18)_42%,rgba(6,8,16,0.88)_86%,#060810_100%)]" aria-hidden="true" />
       </div>
