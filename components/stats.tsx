@@ -1,6 +1,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Reveal } from './motion-wrapper';
 import { ErrorBoundary } from './ui/error-boundary';
 import { GlobeLiveFallback } from './ui/webgl-fallbacks';
@@ -18,18 +20,28 @@ const stats = [
 ];
 
 export function Stats() {
+  const isMobile = useIsMobile();
+  const [mounted, setMounted] = useState(false);
+  const canRenderGlobe = mounted && !isMobile;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <section aria-label="Estadísticas de ciberseguridad" className="overflow-hidden px-4 py-16 sm:px-8 sm:py-20 lg:py-36">
       <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.88fr)] lg:gap-16">
-        <Reveal delay={0.12} className="relative order-1 mx-auto w-full max-w-[min(27rem,86vw)] lg:order-2 lg:max-w-xl">
-          <div className="absolute inset-x-8 top-1/2 h-px bg-gradient-to-r from-transparent via-[#00B4FF]/30 to-transparent" aria-hidden="true" />
-          <ErrorBoundary name="StatsGlobe" fallback={<GlobeLiveFallback />}>
-            <DynamicGlobeLive />
-          </ErrorBoundary>
-          <p className="mt-4 text-center text-[10px] font-semibold uppercase tracking-[0.22em] text-cyanfire sm:mt-5 sm:text-[11px] sm:tracking-[0.32em]">
-            Mapa de amenazas globales · tiempo real
-          </p>
-        </Reveal>
+        {canRenderGlobe ? (
+          <Reveal delay={0.12} className="relative order-1 mx-auto hidden w-full max-w-[min(27rem,86vw)] md:block lg:order-2 lg:max-w-xl">
+            <div className="absolute inset-x-8 top-1/2 h-px bg-gradient-to-r from-transparent via-[#00B4FF]/30 to-transparent" aria-hidden="true" />
+            <ErrorBoundary name="StatsGlobe" fallback={<GlobeLiveFallback />}>
+              <DynamicGlobeLive />
+            </ErrorBoundary>
+            <p className="mt-4 text-center text-[10px] font-semibold uppercase tracking-[0.22em] text-cyanfire sm:mt-5 sm:text-[11px] sm:tracking-[0.32em]">
+              Mapa de amenazas globales · tiempo real
+            </p>
+          </Reveal>
+        ) : null}
 
         <div className="order-2 lg:order-1">
           <Reveal className="mb-8 max-w-3xl sm:mb-12">
@@ -39,17 +51,18 @@ export function Stats() {
             </h2>
           </Reveal>
 
-          <div className="grid grid-cols-1 overflow-hidden border-y border-line/90 bg-deep/75 shadow-soft backdrop-blur-xl min-[480px]:grid-cols-2">
+          {/* En móvil lo esencial son las cifras: grid 2x2, sin canvas/cobe ni fallback de globo. */}
+          <div className="grid grid-cols-2 overflow-hidden border-y border-line/90 bg-deep/75 shadow-soft backdrop-blur-xl">
             {stats.map((stat, index) => (
               <Reveal
                 key={stat.label}
                 delay={index * 0.06}
-                className="border-line/70 px-5 py-7 min-[480px]:[&:nth-child(2n)]:border-l min-[480px]:[&:nth-child(n+3)]:border-t sm:px-8 sm:py-8 lg:min-h-44"
+                className="border-line/70 px-4 py-6 even:border-l [&:nth-child(n+3)]:border-t sm:px-8 sm:py-8 lg:min-h-44"
               >
-                <p className="text-3xl font-extralight tracking-[-0.04em] text-textfire sm:text-5xl xl:text-6xl">
+                <p className="text-2xl font-extralight tracking-[-0.04em] text-textfire min-[380px]:text-3xl sm:text-5xl xl:text-6xl">
                   <span className="font-semibold">{stat.value}</span>
                 </p>
-                <p className="mt-3 max-w-48 text-sm leading-6 text-mutedfire sm:mt-4">{stat.label}</p>
+                <p className="mt-3 max-w-48 text-xs leading-5 text-mutedfire min-[380px]:text-sm sm:mt-4 sm:leading-6">{stat.label}</p>
               </Reveal>
             ))}
           </div>
